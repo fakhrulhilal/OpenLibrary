@@ -1,0 +1,70 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+    <metadata>
+        <id>OpenLibrary</id>
+        <version>1.7.3</version>
+        <title>OpenLibrary</title>
+        <authors>Fakhrulhilal Maktum</authors>
+        <owners>Fakhrulhilal Maktum</owners>
+        <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+        <projectUrl>https://github.com/fakhrulhilal/OpenLibrary</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Various utility for C# programmer.</description>
+        <releaseNotes>Version 1.7.3
+- Separate to 3 different assembly and package (OpenLibrary, OpenLibrary-Document, OpenLibrary-MVC)
+
+Version 1.7.2
+- Opening OpenLibrary.Utility.Sql.ToSqlParameter to public
+		
+Version 1.7.1.6:
+- Adding documentation
+
+Version 1.7.0:
+- Added Type for MappingOptionAttribute (usefull when converting to strong type)
+- Added support Dictionary output for all CSV, excel import
+- Fixing bug for formatting integer data type (FormatHelper)
+- Adding initial DataTables model binding
+- Sql: adding option to define IsolationLevel when starting transaction
+- Sql: connection based on thread and connection string name for uniqueness
+
+Version 1.6.0:
+- Added new AllowAuthenticatedAttribute to represents AccessRightAttribute to skip authorization when authenticated
+- Added feature AccessRightAttribute (custom version of AuthorizedAttribute)
+- Fix bug PostRedirectGetAttribute (default key with format /Area/Controller/Action)
+
+Version 1.5.1:
+- Fix bug: handle detecting wether transaction is running or not
+
+Version 1.5.0:
+- Generate baseUrl automatically when left null based on QueryString
+- Fix bug set DatabaseGenerated property on Sql.Insert
+
+Version 1.4.0:
+- Added feature for Delete &amp; Update in Sql utility
+- Adding MappingOptionAttribute for export/import data from file
+
+Version 1.3.2:
+- Fixed bug format integer
+
+Version 1.3.0:
+- Added feature for Update &amp; Delete in Sql utility</releaseNotes>
+        <tags>openlibrary excel-importer csv-importer excel-exporter csv-exporter authorize-attribute helper sql</tags>
+        <!--<dependencies>
+            <group targetFramework=".NETFramework4.5">
+                <dependency id="Newtonsoft.Json" version="5.0.8" />
+                <dependency id="EPPlus" version="3.1.3.3" />
+                <dependency id="NPOI" version="1.2.5" />
+            </group>
+            <group targetFramework=".NETFramework4.0">
+                <dependency id="Newtonsoft.Json" version="5.0.8" />
+                <dependency id="NPOI" version="1.2.5" />
+                <dependency id="EPPlus" version="3.1.3.3" />
+            </group>
+        </dependencies>-->
+    </metadata>
+    <files>
+        <file src="..\OpenLibrary\bin\Release\OpenLibrary.dll" target="lib\net45\OpenLibrary.dll" />
+        <file src="..\OpenLibrary\bin\Release\OpenLibrary.pdb" target="lib\net45\OpenLibrary.pdb" />
+        <file src="..\OpenLibrary\bin\Release\OpenLibrary.XML" target="lib\net45\OpenLibrary.XML" />
+    </files>
+</package>
