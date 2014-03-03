@@ -3,13 +3,13 @@
     <metadata>
         <id>OpenLibrary-MVC</id>
         <version>1.7.3</version>
-        <title>OpenLibrary</title>
+        <title>OpenLibrary MVC</title>
         <authors>Fakhrulhilal Maktum</authors>
         <owners>Fakhrulhilal Maktum</owners>
         <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
         <projectUrl>https://github.com/fakhrulhilal/OpenLibrary</projectUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
-        <description>Various utility for C# programmer.</description>
+        <description>Various utility for ASP.NET MVC framework (helper, filter, model binder, etc).</description>
         <releaseNotes>Version 1.7.3
 - Separate to 3 different assembly and package (OpenLibrary, OpenLibrary-Document, OpenLibrary-MVC)
 

@@ -1,16 +1,12 @@
-﻿using OpenLibrary.Utility;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
 using OpenLibrary.Extension;
 using OpenLibrary.Mvc.Helper;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Data.SqlClient;
 using OpenLibrary.Annotation;
-using OpenLibrary.Document;
 
 namespace OpenLibrary.Test
 {
@@ -75,7 +71,7 @@ namespace OpenLibrary.Test
 			//	ModifiedTime = reader["ModifiedTime"].To<System.DateTime?>(),
 			//	ModifiedBy = reader["ModifiedBy"].To<string>()
 			//}, true, new SqlParameter("@Name", "%robert%"), new SqlParameter("@creator", "admin"));
-			var activeEmployee = Sql.Query<Employee>("SP_Employee_select", new { Name = "%robert", creator = "admin" }, true);
+			/*var activeEmployee = Sql.Query<Employee>("SP_Employee_select", new { Name = "%robert", creator = "admin" }, true);
 			var unmodifiedEmployee = Sql.Query<Employee>("SP_Employee_select", new
 			{
 				Name = "%robert",
@@ -93,36 +89,45 @@ namespace OpenLibrary.Test
 				CreatedTime = System.DateTime.Now
 			};
 			var id = Sql.Insert(employee);
-var employees = new[] {
-	new Employee
-	{	
-		Name = "Robert",
-		Age = 25,
-		BirthDate = new System.DateTime(2000, 1, 1),
-		IsActive = true,
-		CreatedBy = "admin",
-		CreatedTime = System.DateTime.Now
-	},
-	new Employee
-	{	
-		Name = "Junior",
-		Age = 15,
-		IsActive = false,
-		CreatedBy = "admin",
-		CreatedTime = System.DateTime.Now
-	}
-};
-Sql.Insert(employees);
-var firstEmployee = Sql.Query<Employee>("select top 1 * from Mst_Employee").FirstOrDefault();
-//change his age
-if (firstEmployee != null)
-{
-	firstEmployee.Age += 5;
-	Sql.Update(firstEmployee);
-}
+			var employees = new[]
+			{
+				new Employee
+				{
+					Name = "Robert",
+					Age = 25,
+					BirthDate = new System.DateTime(2000, 1, 1),
+					IsActive = true,
+					CreatedBy = "admin",
+					CreatedTime = System.DateTime.Now
+				},
+				new Employee
+				{
+					Name = "Junior",
+					Age = 15,
+					IsActive = false,
+					CreatedBy = "admin",
+					CreatedTime = System.DateTime.Now
+				}
+			};
+			Sql.Insert(employees);
+			var firstEmployee = Sql.Query<Employee>("select top 1 * from Mst_Employee").FirstOrDefault();
+			//change his age
+			if (firstEmployee != null)
+			{
+				firstEmployee.Age += 5;
+				Sql.Update(firstEmployee);
+			}
+			*/
+			string connectionString = "LDAP://adfs.abacus-ind.co.id/CN=Users,DC=abacus-ind,DC=co,DC=id";
+			var matchs = Regex.Matches(connectionString, @"(?:DC=)(?<domain>[\w\-]+)", RegexOptions.IgnoreCase);
+			List<string> domainList = (from Match match in matchs
+				select match.Groups["domain"].Value).ToList();
+			Console.WriteLine("domain -> {0}", string.Join(".", domainList));
 			Console.ReadLine();
 		}
 	}
+
+	#region Type Helper
 
 	[Table("Mst_Employee")]
 	public class Employee
@@ -218,7 +223,7 @@ if (firstEmployee != null)
 		public string Test<T>(T data) where T : class { return null; }
 	}
 
-	[Table("Mst_Agent"), System.Obsolete]
+	[Table("Mst_Agent")]
 	public class Agent
 	{
 		[Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -267,5 +272,7 @@ if (firstEmployee != null)
 
 		[Column("ModifiedTime"), ReadOnly]
 		public System.DateTime? ModifiedTime { get; set; }
-	}
+	} 
+
+	#endregion
 }
