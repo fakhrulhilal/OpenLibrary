@@ -33,7 +33,7 @@ namespace OpenLibrary.Mvc.ModelBinding
 				// Both "." and "," should be accepted, but aren't.
 				string wantedSeperator = NumberFormatInfo.CurrentInfo.NumberDecimalSeparator;
 				string alternateSeperator = (wantedSeperator == "," ? "." : ",");
-
+				// ReSharper disable StringIndexOfIsCultureSpecific.1
 				if (attemptedValue.IndexOf(wantedSeperator) == -1 &&
 					attemptedValue.IndexOf(alternateSeperator) != -1)
 					attemptedValue = attemptedValue.Replace(alternateSeperator, wantedSeperator);

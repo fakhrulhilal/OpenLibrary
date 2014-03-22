@@ -31,7 +31,12 @@ namespace OpenLibrary.Mvc.Helper
 		/// <summary>
 		/// Error (default: red alert)
 		/// </summary>
-		Error
+		Error,
+
+		/// <summary>
+		/// Alias for Error (red alert)
+		/// </summary>
+		Danger = Error
 	}
 
 	/// <summary>
@@ -84,6 +89,8 @@ namespace OpenLibrary.Mvc.Helper
 		{
 			var htmlFlash = new TagBuilder("div");
 			string className = "alert-" + type;
+			if (type == "error")
+				className += " alert-danger";
 			htmlFlash.AddCssClass("alert " + className + " fade in");
 			var htmlClose = new TagBuilder("button");
 			htmlClose.AddCssClass("close");
@@ -105,9 +112,9 @@ namespace OpenLibrary.Mvc.Helper
 		{
 			var html = new StringBuilder();
 			string[] types = System.Enum.GetNames(typeof(FlashMessageType));
-			foreach (string _type in types)
+			foreach (string t in types)
 			{
-				string type = _type.ToLower();
+				string type = t.ToLower();
 				if (helper.ViewContext.TempData[FLASH_MESSAGE + type] != null)
 				{
 					html.Append(RenderFlashMessage(helper.ViewContext.TempData[FLASH_MESSAGE + type].ToString(), type));

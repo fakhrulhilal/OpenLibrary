@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Text.RegularExpressions;
 using OpenLibrary.Extension;
 using OpenLibrary.Mvc.Helper;
@@ -12,7 +11,9 @@ namespace OpenLibrary.Test
 {
 	class Program
 	{
+// ReSharper disable UnusedParameter.Local
 		static void Main(string[] args)
+// ReSharper restore UnusedParameter.Local
 		{
 			//string sql = "insert into reffpcc(xpcc_id, xname, xtype, xphone, xaddress, xcountry, xcommision, xdeposit) values(@xpcc_id, @xname, @xtype, @xphone, @xaddress, @xcountry, @xcommision, @xdeposit)";
 			//var test = new AgentPcc
@@ -150,10 +151,10 @@ namespace OpenLibrary.Test
 
 		[Column("BirthDate")]
 		[DataType(DataType.Date)]
-		public System.DateTime? BirthDate { get; set; }
+		public DateTime? BirthDate { get; set; }
 
 		[Column("CreatedTime")]
-		public System.DateTime CreatedTime { get; set; }
+		public DateTime CreatedTime { get; set; }
 
 		[Column("CreatedBy")]
 		[MaxLength(50)]
@@ -161,7 +162,7 @@ namespace OpenLibrary.Test
 		public string CreatedBy { get; set; }
 
 		[Column("ModifiedTime")]
-		public System.DateTime? ModifiedTime { get; set; }
+		public DateTime? ModifiedTime { get; set; }
 
 		[Column("ModifiedBy")]
 		[MaxLength(50)]
@@ -193,7 +194,7 @@ namespace OpenLibrary.Test
 		public string Country { get; set; }
 
 		[Column("created_datetime"), ReadOnly]
-		public System.DateTime? RegistrationTime { get; set; }
+		public DateTime? RegistrationTime { get; set; }
 
 		[Column("xdeposit")]
 		public decimal? Deposit { get; set; }
@@ -213,7 +214,7 @@ namespace OpenLibrary.Test
 		}
 	}
 
-	class TestAttribute : System.Attribute
+	class TestAttribute : Attribute
 	{
 		public TestAttribute(int data)
 		{
@@ -265,13 +266,13 @@ namespace OpenLibrary.Test
 		public string CreatedBy { get; set; }
 
 		[Column("CreatedTime"), ReadOnly, MaxLength]
-		public System.DateTime CreatedTime { get; set; }
+		public DateTime CreatedTime { get; set; }
 
 		[Column("ModifiedBy"), ReadOnly, MaxLength(50)]
 		public string ModifiedBy { get; set; }
 
 		[Column("ModifiedTime"), ReadOnly]
-		public System.DateTime? ModifiedTime { get; set; }
+		public DateTime? ModifiedTime { get; set; }
 	} 
 
 	#endregion

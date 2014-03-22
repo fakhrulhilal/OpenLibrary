@@ -35,7 +35,7 @@ namespace OpenLibrary.Mvc.Helper
 	/// </summary>
 	public static class ConfigurationHelper
 	{
-		private static Dictionary<string, string> _cachedConfig;
+		private static Dictionary<string, string> cachedConfig;
 
 		/// <summary>
 		/// Get app configuration (App.Config)
@@ -46,11 +46,11 @@ namespace OpenLibrary.Mvc.Helper
 		{
 			if (string.IsNullOrEmpty(key))
 				return string.Empty;
-			_cachedConfig = _cachedConfig ?? new Dictionary<string, string>();
+			cachedConfig = cachedConfig ?? new Dictionary<string, string>();
 			try
 			{
 				//search in cache first
-				return _cachedConfig[key];
+				return cachedConfig[key];
 			}
 			catch (KeyNotFoundException)
 			{
@@ -60,11 +60,13 @@ namespace OpenLibrary.Mvc.Helper
 				{
 					//try searching for [Application]:key if empty or not found
 					string applicationName = AppConfig("Application");
+// ReSharper disable InconsistentNaming
 					string _appConfig = ConfigurationManager.AppSettings[applicationName + ":" + key];
+// ReSharper restore InconsistentNaming
 					if (!string.IsNullOrEmpty(_appConfig))
 						appConfig = _appConfig;
 				}
-				_cachedConfig[key] = appConfig;
+				cachedConfig[key] = appConfig;
 				return appConfig;
 			}
 			catch (System.IndexOutOfRangeException) { }

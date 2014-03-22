@@ -1,7 +1,5 @@
-﻿using System;
-using System.Web.Mvc;
+﻿using System.Web.Mvc;
 using OpenLibrary.Mvc.Attribute;
-using OpenLibrary.Extension;
 
 namespace OpenLibrary.Mvc.ModelBinding
 {
@@ -45,7 +43,7 @@ namespace OpenLibrary.Mvc.ModelBinding
 		{
 			object result = null;
 			errorMessage = "{0} contains illegal characters, i.e. one of {1}.";
-			if (bindingContext.ModelType == typeof(String))
+			if (bindingContext.ModelType == typeof(string))
 			{
 				string modelName = bindingContext.ModelName;
 				var valueResult = bindingContext.ValueProvider.GetValue(modelName);
@@ -76,8 +74,14 @@ namespace OpenLibrary.Mvc.ModelBinding
 					}
 				}
 				//validasi jika ada karakter yang tidak diperkenankan -> hanya jika illegal character ditentukan
-				if (!string.IsNullOrEmpty(IllegalCharacters) && System.Text.RegularExpressions.Regex.IsMatch(modelValue, "[" + IllegalCharacters + "]"))
-					bindingContext.ModelState.AddModelError(modelName, string.Format(errorMessage, string.IsNullOrEmpty(bindingContext.ModelMetadata.DisplayName) ? modelName : bindingContext.ModelMetadata.DisplayName));
+				if (!string.IsNullOrEmpty(IllegalCharacters) &&
+					System.Text.RegularExpressions.Regex.IsMatch(modelValue, "[" + IllegalCharacters + "]"))
+					bindingContext.ModelState.AddModelError(modelName,
+															string.Format(errorMessage,
+																		  bindingContext.ModelMetadata != null &&
+																		  !string.IsNullOrEmpty(bindingContext.ModelMetadata.DisplayName)
+																			  ? bindingContext.ModelMetadata.DisplayName
+																			  : modelName));
 				result = modelValue;
 			}
 			return result;

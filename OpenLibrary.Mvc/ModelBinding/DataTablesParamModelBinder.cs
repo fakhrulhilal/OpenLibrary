@@ -4,6 +4,7 @@ using OpenLibrary.Extension;
 
 namespace OpenLibrary.Mvc.ModelBinding
 {
+	// ReSharper disable InconsistentNaming
 	/// <summary>
 	/// Process ModelBinding for DataTables (DataTables.net) <see cref="DataTablesModelBinder"/>
 	/// </summary>
@@ -51,7 +52,7 @@ namespace OpenLibrary.Mvc.ModelBinding
 			if (bindingContext.ModelType == typeof(DataTablesParam))
 			{
 				var provider = bindingContext.ValueProvider;
-				var controller = controllerContext.HttpContext;
+				//var controller = controllerContext.HttpContext;
 				if (provider.GetValue("iDisplayStart") != null)
 					model.iDisplayStart = provider.GetValue("iDisplayStart").AttemptedValue.To<int>();
 				if (provider.GetValue("iDisplayLength") != null)

@@ -27,11 +27,10 @@ namespace OpenLibrary.Mvc.Helper
 			if (data is IEnumerable)
 				return SerializeEnumerableToWwwForm((IEnumerable)data, prefix);
 			var pairs = new List<string>();
-			object value;
 			prefix = string.IsNullOrEmpty(prefix) ? "" : prefix + ".";
 			foreach (var field in fields)
 			{
-				value = field.GetValue(data, null);
+				object value = field.GetValue(data, null);
 				if (value == null)
 					pairs.Add(string.Format("{0}{1}=", prefix, System.Web.HttpUtility.UrlEncode(field.Name)));
 				else if (!(value is string) && value is IEnumerable)
@@ -55,14 +54,11 @@ namespace OpenLibrary.Mvc.Helper
 			var fields = underlyingType.GetProperties(BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.GetProperty);
 			int counter = 0;
 			var pairs = new List<string>();
-			var dottedPrefix = string.IsNullOrEmpty(prefix) ? "" : prefix + ".";
+			//var dottedPrefix = string.IsNullOrEmpty(prefix) ? "" : prefix + ".";
 			foreach (var item in collection)
-			{
-				if (isPrimitive)
-					pairs.Add(string.Format("{0}[{1}]={2}", prefix, counter++, item.To<string>(dateFormat: "yyyy-MM-dd")));
-				else
-					pairs.Add(item.SerializeToWwwForm(fields, string.Format("{0}[{1}]", prefix, counter++)));
-			}
+				pairs.Add(isPrimitive
+							  ? string.Format("{0}[{1}]={2}", prefix, counter++, item.To<string>(dateFormat: "yyyy-MM-dd"))
+							  : item.SerializeToWwwForm(fields, string.Format("{0}[{1}]", prefix, counter++)));
 			return string.Join("&", pairs);
 		}
 	}

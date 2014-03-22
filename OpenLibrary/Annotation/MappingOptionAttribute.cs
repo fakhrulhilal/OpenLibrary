@@ -7,6 +7,7 @@ namespace OpenLibrary.Annotation
 	[System.AttributeUsage(System.AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
 	public class MappingOptionAttribute : System.Attribute
 	{
+		// ReSharper disable UnusedAutoPropertyAccessor.Local
 		/// <summary>
 		/// Caption in file.
 		/// Using <see cref="System.ComponentModel.DataAnnotations.DisplayAttribute"/> or property name when not specified.

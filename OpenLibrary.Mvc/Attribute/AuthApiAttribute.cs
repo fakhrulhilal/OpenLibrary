@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Net;
 using System.Web.Http.Controllers;
 using System.Net.Http;
@@ -59,7 +58,7 @@ namespace OpenLibrary.Mvc.Attribute
 		/// Auth API
 		/// </summary>
 		/// <param name="provider">typeof <see cref="IApiAuthProvider"/> implementation. This implementation must provide parameterless constructor</param>
-		public AuthApiAttribute(Type provider)
+		public AuthApiAttribute(System.Type provider)
 		{
 			if (provider == null)
 				throw new System.ArgumentNullException("provider", "Provider must be defined.");
@@ -83,10 +82,10 @@ namespace OpenLibrary.Mvc.Attribute
 		/// <param name="provider">typeof <see cref="IApiAuthProvider"/> implementation. This implementation must provide parameterless constructor</param>
 		public AuthApiAttribute(IApiAuthProvider provider)
 		{
-			if (provider == null)
-				throw new System.ArgumentNullException("provider", "Provider must be defined.");
-			else
+			if (provider != null)
 				Provider = provider;
+			else
+				throw new System.ArgumentNullException("provider", "Provider must be defined.");
 		}
 
 		private bool IsValidTime(HttpRequestMessage request)
@@ -114,13 +113,13 @@ namespace OpenLibrary.Mvc.Attribute
 			if (MemoryCache.Default.Contains(signature))
 				return false;
 			string apiKey = headers.GetValues(ApiKeyHeader).FirstOrDefault();
-			if (!Provider.IsValidApiKey(apiKey))
+			if (string.IsNullOrEmpty(apiKey) || !Provider.IsValidApiKey(apiKey))
 				return false;
 			string verifiedSignature = Provider.Signature(apiKey, request);
 			if (verifiedSignature == signature)
 			{
 				//save signature to cache for a certain validity period
-				MemoryCache.Default.Add(signature, apiKey, DateTimeOffset.UtcNow.AddMinutes(ValidityPeriod));
+				MemoryCache.Default.Add(signature, apiKey, System.DateTimeOffset.UtcNow.AddMinutes(ValidityPeriod));
 				return true;
 			}
 			return false;

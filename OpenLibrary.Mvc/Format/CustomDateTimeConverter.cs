@@ -1,6 +1,4 @@
-﻿using System;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
 using OpenLibrary.Extension;
 using Newtonsoft.Json.Converters;
 using System.ComponentModel.DataAnnotations;
@@ -45,7 +43,6 @@ namespace OpenLibrary.Mvc.Formatter
 				writer.WriteValue("");
 				return;
 			}
-			var result = new JObject();
 			string format = Format;
 			//cari format sesuai dengan tipe data sumber
 			if (string.IsNullOrEmpty(format))
@@ -58,10 +55,14 @@ namespace OpenLibrary.Mvc.Formatter
 					format = type.DataType == DataType.Date ? "yyyy-MM-dd" : type.DataType == DataType.Time ? "HH:mm:ss" : format;
 				}
 			}
-			if (value is DateTime)
-				writer.WriteValue(((DateTime)value).ToString(format));
-			else if (value is DateTime?)
-				writer.WriteValue(((DateTime?)value).GetValueOrDefault().ToString(format));
+			if (value is System.DateTime)
+				writer.WriteValue(((System.DateTime)value).ToString(format));
+// ReSharper disable ConditionIsAlwaysTrueOrFalse
+			else if (value is System.DateTime?)
+// ReSharper restore ConditionIsAlwaysTrueOrFalse
+// ReSharper disable HeuristicUnreachableCode
+				writer.WriteValue(((System.DateTime?)value).GetValueOrDefault().ToString(format));
+// ReSharper restore HeuristicUnreachableCode
 			else
 				writer.WriteValue(value.To<string>(dateFormat: format));
 		}
@@ -74,12 +75,14 @@ namespace OpenLibrary.Mvc.Formatter
 		/// <param name="existingValue"></param>
 		/// <param name="serializer"></param>
 		/// <returns></returns>
-		public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
+		public override object ReadJson(JsonReader reader, System.Type objectType, object existingValue, JsonSerializer serializer)
 		{
 			if (reader.TokenType != JsonToken.String)
+// ReSharper disable ConditionIsAlwaysTrueOrFalse
 				return (reader.Value is System.DateTime || reader.Value is System.DateTime?)
+// ReSharper restore ConditionIsAlwaysTrueOrFalse
 					? reader.Value
-					: objectType == typeof(DateTime) ? (object)DateTime.MinValue : null;
+					: objectType == typeof(System.DateTime) ? (object)System.DateTime.MinValue : null;
 			var stringDateTime = (string)reader.Value;
 			if (!string.IsNullOrEmpty(Format))
 			{

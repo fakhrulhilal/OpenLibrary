@@ -69,6 +69,7 @@ namespace OpenLibrary.Mvc.Helper
 	/// </summary>
 	public static class MenuHelper
 	{
+		// ReSharper disable UnusedParameter.Local
 		private static List<Menu> RootMenus { get; set; }
 		private static List<Menu> AllMenus { get; set; }
 		private static string BaseUrl { get; set; }
@@ -76,7 +77,7 @@ namespace OpenLibrary.Mvc.Helper
 		private static string GetBaseUrl(this HtmlHelper helper)
 		{
 			if (string.IsNullOrEmpty(BaseUrl))
-				BaseUrl = UrlHelper.GenerateContentUrl("~/", helper.ViewContext.HttpContext).TrimEnd(new char[] { '/' });
+				BaseUrl = UrlHelper.GenerateContentUrl("~/", helper.ViewContext.HttpContext).TrimEnd(new[] { '/' });
 			return BaseUrl;
 		}
 
@@ -220,7 +221,7 @@ namespace OpenLibrary.Mvc.Helper
 					var htmlChild = new StringBuilder();
 					if (childMenu.ChildMenus.Count > 0)
 					{
-						htmlChild.Append((object)BuildChildSubMenu(childMenu.Id, recursive, baseUrl));
+						htmlChild.Append(BuildChildSubMenu(childMenu.Id, recursive, baseUrl));
 					}
 					else
 					{
@@ -229,13 +230,13 @@ namespace OpenLibrary.Mvc.Helper
 						tagAnchorChild.Attributes.Add("href", baseUrl + childMenu.Url);
 						tagAnchorChild.InnerHtml = childMenu.TranslatedCaption;
 						tagChild.InnerHtml = tagAnchorChild.ToString();
-						htmlChild.Append((object)tagChild);
+						htmlChild.Append(tagChild);
 					}
 					if (htmlChild.Length > 0)
 						tagContainerChild.InnerHtml += htmlChild.ToString();
 				}
 				tagParent.InnerHtml += tagContainerChild.ToString();
-				html.Append((object)tagParent);
+				html.Append(tagParent);
 			}
 			return new MvcHtmlString(html.Length > 0 ? html.ToString() : string.Empty);
 		}
@@ -284,7 +285,7 @@ namespace OpenLibrary.Mvc.Helper
 					var htmlChild = new StringBuilder();
 					if (childMenu.ChildMenus.Count > 0)
 					{
-						htmlChild.Append((string)BuildChildSubMenu(childMenu.Id, true, GetBaseUrl(helper)).ToString());
+						htmlChild.Append(BuildChildSubMenu(childMenu.Id, true, GetBaseUrl(helper)));
 					}
 					else
 					{
@@ -306,7 +307,7 @@ namespace OpenLibrary.Mvc.Helper
 			{
 				tagParent.InnerHtml += tagAnchorParent.ToString();
 			}
-			html.Append((object)tagParent);
+			html.Append(tagParent);
 			return new MvcHtmlString(html.Length > 0 ? html.ToString() : string.Empty);
 		}
 

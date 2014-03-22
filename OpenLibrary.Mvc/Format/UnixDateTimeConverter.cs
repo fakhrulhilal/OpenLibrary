@@ -45,7 +45,7 @@ namespace OpenLibrary.Mvc.Formatter
 				var delta = ((DateTime)value) - epoc;
 				if (delta.TotalSeconds < 0)
 				{
-					throw new ArgumentOutOfRangeException("Unix epoc starts January 1st, 1970");
+					throw new ArgumentOutOfRangeException("value", "Unix epoc starts January 1st, 1970");
 				}
 				ticks = (long)delta.TotalSeconds;
 			}

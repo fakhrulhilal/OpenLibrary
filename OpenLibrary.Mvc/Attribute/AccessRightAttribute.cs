@@ -119,7 +119,9 @@ namespace OpenLibrary.Mvc.Attribute
 			Provider = provider;
 		}
 
+// ReSharper disable UnusedParameter.Local
 		private AccessRightAttribute(string accessObject, int? accessRight, int dummy)
+// ReSharper restore UnusedParameter.Local
 		{
 			if (!string.IsNullOrEmpty(accessObject))
 				AccessObject = accessObject;
