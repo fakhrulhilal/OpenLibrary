@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Text.RegularExpressions;
 using System.Linq;
+using OpenLibrary.Extension;
 
 namespace OpenLibrary.Utility
 {
@@ -123,6 +124,29 @@ namespace OpenLibrary.Utility
 		public static string HumanizeFileSize(this FileStream file)
 		{
 			return file == null ? "0" : HumanizeFileSize(file.Length);
+		}
+
+		/// <summary>
+		/// Generate alphabet string of number (1 -> A, 27 -> AA, 62 -> BJ, etc)
+		/// </summary>
+		/// <param name="number">number</param>
+		/// <returns>alphabet index</returns>
+		public static string Alphabet(this int number)
+		{
+			string digits = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+			int columnBase = digits.Length;
+			if (number <= columnBase)
+				return digits[number - 1].ToString();
+			int digitMax = System.Math.Ceiling(System.Math.Log(int.MaxValue, columnBase)).To<int>();
+			var sb = new System.Text.StringBuilder().Append(' ', digitMax);
+			int column = number;
+			int offset = digitMax;
+			while (column > 0)
+			{
+				sb[--offset] = digits[--column % columnBase];
+				column /= columnBase;
+			}
+			return sb.ToString(offset, digitMax - offset);
 		}
 	}
 }

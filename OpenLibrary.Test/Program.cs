@@ -120,8 +120,8 @@ namespace OpenLibrary.Test
 			*/
 			string connectionString = "LDAP://adfs.abacus-ind.co.id/CN=Users,DC=abacus-ind,DC=co,DC=id";
 			var matchs = Regex.Matches(connectionString, @"(?:DC=)(?<domain>[\w\-]+)", RegexOptions.IgnoreCase);
-			List<string> domainList = (from Match match in matchs
-				select match.Groups["domain"].Value).ToList();
+			var domainList = (from Match match in matchs
+							  select match.Groups["domain"].Value).ToList();
 			Console.WriteLine("domain -> {0}", string.Join(".", domainList));
 			Console.ReadLine();
 		}

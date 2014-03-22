@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -24,7 +23,7 @@ namespace OpenLibrary.Document
 				return styleOptions ??
 					   new Dictionary<Type, string>
 					   {
-						   { typeof(System.DateTime), "yyyy-MM-dd" },
+						   { typeof(DateTime), "yyyy-MM-dd" },
 						   { typeof(decimal), "#,#.#####;-#,#.#####;\"-\"" },
 						   { typeof(double), "#,#.#####;-#,#.#####;\"-\"" },
 						   { typeof(int), "#,#;-#,#;\"-\"" },
@@ -32,7 +31,9 @@ namespace OpenLibrary.Document
 						   { typeof(string), "@" }
 					   };
 			}
+// ReSharper disable UnusedMember.Local
 			set { styleOptions = value; }
+// ReSharper restore UnusedMember.Local
 		}
 
 		/// <summary>
@@ -154,8 +155,9 @@ namespace OpenLibrary.Document
 			//parsing baris header row untuk mencari posisi field dan nilainya
 			var firstRow = worksheet.Row(headerRow);
 			if (firstRow == null || worksheet.Dimension == null)
-				throw new ArgumentNullException("Header row not found");
-			int kolom = 1, lastKolom = -1;
+				throw new ArgumentNullException("headerRow", "Header row not found");
+			int kolom = 1;
+			//int lastKolom = -1;
 			while (true)
 			{
 				//ambil nama caption yg muncul
@@ -163,17 +165,19 @@ namespace OpenLibrary.Document
 				if (cell == null || cell.Value == null)
 					break;
 				string caption = cell.Value.To<string>();
+				if (!string.IsNullOrEmpty(caption))
+					caption = caption.Trim();
 				//jika sudah ditemukan kolom yang isinya kosong, langsung hentikan pencarian
 				if (string.IsNullOrEmpty(caption))
 					break;
 				//cara nama caption dari daftar opsi import
 				var columnOption = isCaseSensitive
-					? importOption.FirstOrDefault(model => model.Caption.Trim() == caption.Trim())
-					: importOption.FirstOrDefault(model => model.Caption.Trim().ToLower() == caption.Trim().ToLower());
+					? importOption.FirstOrDefault(model => model.Caption.Trim() == caption)
+					: importOption.FirstOrDefault(model => model.Caption.Trim().ToLower() == caption.ToLower());
 				//masukkan posisi kolom ke priority
 				if (columnOption != null)
 					columnOption.Sequence = kolom;
-				lastKolom = kolom;
+				//lastKolom = kolom;
 				kolom++;
 			}
 			//sort opsi import untuk mempermudah akses
@@ -197,7 +201,7 @@ namespace OpenLibrary.Document
 		/// <param name="isBreakOnEmptyRow">jika ditemukan baris kosong untuk semua yg terscan, maka dianggap akhir baris (default: tidak)</param>
 		/// <param name="isCaseSensitive">menentukan apakah pencocokan nama header case sensitive atau tidak (default: tidak)</param>
 		/// <param name="dateFormat">format tanggal</param>
-		public static void FromExcel<T>(Stream file, System.Action<T> action, string worksheetName = "", List<MappingOption> importOption = null, int headerRow = 1, bool isBreakOnEmptyRow = false, bool isCaseSensitive = false, string dateFormat = "")
+		public static void FromExcel<T>(Stream file, Action<T> action, string worksheetName = "", List<MappingOption> importOption = null, int headerRow = 1, bool isBreakOnEmptyRow = false, bool isCaseSensitive = false, string dateFormat = "")
 			where T : class, new()
 		{
 			var workbook = new ExcelPackage(file);
@@ -205,6 +209,8 @@ namespace OpenLibrary.Document
 			try
 			{
 				PrepareFromExcel<T>(workbook, out worksheet, worksheetName, importOption, headerRow, isCaseSensitive);
+				if (importOption == null)
+					importOption = new List<MappingOption>();
 				var mapping = importOption.Where(m => m.Sequence.HasValue).ToList().ToDictionary(m => m.Sequence ?? 0, m => m);
 				int lastKolom = importOption.Max(model => model.Sequence ?? 0);
 				//tidak perlu proses jika dalam caption tidak disebutkan dalam baris pertama
@@ -311,7 +317,7 @@ namespace OpenLibrary.Document
 		/// <param name="isBreakOnEmptyRow">jika ditemukan baris kosong untuk semua yg terscan, maka dianggap akhir baris (default: tidak)</param>
 		/// <param name="isCaseSensitive">menentukan apakah pencocokan nama header case sensitive atau tidak (default: tidak)</param>
 		/// <param name="dateFormat">format tanggal</param>
-		public static void FromExcel<T>(string filename, System.Action<T> action, string worksheetName = "", List<MappingOption> importOption = null, int headerRow = 1, bool isBreakOnEmptyRow = false, bool isCaseSensitive = false, string dateFormat = "")
+		public static void FromExcel<T>(string filename, Action<T> action, string worksheetName = "", List<MappingOption> importOption = null, int headerRow = 1, bool isBreakOnEmptyRow = false, bool isCaseSensitive = false, string dateFormat = "")
 			where T : class, new()
 		{
 			using (var fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read))
@@ -333,12 +339,12 @@ namespace OpenLibrary.Document
 		/// <param name="isBreakOnEmptyRow">jika ditemukan baris kosong untuk semua yg terscan, maka dianggap akhir baris (default: tidak)</param>
 		/// <param name="isCaseSensitive">menentukan apakah pencocokan nama header case sensitive atau tidak (default: tidak)</param>
 		/// <param name="dateFormat">format tanggal</param>
-		public static void FromExcel(Stream file, System.Action<Dictionary<string, object>> action, string worksheetName = "", List<MappingOption> importOption = null, int headerRow = 1, bool isBreakOnEmptyRow = false, bool isCaseSensitive = false, string dateFormat = "")
+		public static void FromExcel(Stream file, Action<Dictionary<string, object>> action, string worksheetName = "", List<MappingOption> importOption = null, int headerRow = 1, bool isBreakOnEmptyRow = false, bool isCaseSensitive = false, string dateFormat = "")
 		{
 			var workbook = new ExcelPackage(file);
 			ExcelWorksheet worksheet;
 			if (importOption == null || importOption.Count < 1)
-				throw new OpenLibrary.OpenLibraryException("Import option must be provided when using dictionary inspite off entity class.", OpenLibraryErrorType.ArgumentNotValidError);
+				throw new OpenLibraryException("Import option must be provided when using dictionary inspite off entity class.", OpenLibraryErrorType.ArgumentNotValidError);
 			try
 			{
 				PrepareFromExcel<object>(workbook, out worksheet, worksheetName, importOption, headerRow, isCaseSensitive);
@@ -443,7 +449,7 @@ namespace OpenLibrary.Document
 		/// <param name="isBreakOnEmptyRow">jika ditemukan baris kosong untuk semua yg terscan, maka dianggap akhir baris (default: tidak)</param>
 		/// <param name="isCaseSensitive">menentukan apakah pencocokan nama header case sensitive atau tidak (default: tidak)</param>
 		/// <param name="dateFormat">format tanggal</param>
-		public static void FromExcel(string filename, System.Action<Dictionary<string, object>> action, string worksheetName = "", List<MappingOption> importOption = null, int headerRow = 1, bool isBreakOnEmptyRow = false, bool isCaseSensitive = false, string dateFormat = "")
+		public static void FromExcel(string filename, Action<Dictionary<string, object>> action, string worksheetName = "", List<MappingOption> importOption = null, int headerRow = 1, bool isBreakOnEmptyRow = false, bool isCaseSensitive = false, string dateFormat = "")
 		{
 			using (var fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read))
 			{

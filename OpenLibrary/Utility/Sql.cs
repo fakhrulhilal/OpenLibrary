@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Data;
-using System.Configuration;
 using OpenLibrary.Extension;
 using System.ComponentModel.DataAnnotations.Schema;
 using OpenLibrary.Annotation;
@@ -39,10 +38,10 @@ namespace OpenLibrary.Utility
 					return defaultConnectionString;
 				try
 				{
-					defaultConnectionString = ConfigurationManager.AppSettings["OpenLibrary.Utility:Sql(DefaultConnectionString)"];
+					defaultConnectionString = System.Configuration.ConfigurationManager.AppSettings["OpenLibrary.Utility:Sql(DefaultConnectionString)"];
 					return defaultConnectionString;
 				}
-				catch (ConfigurationErrorsException) { }
+				catch (System.Configuration.ConfigurationErrorsException) { }
 				return string.Empty;
 			}
 			set { defaultConnectionString = value; }
@@ -69,7 +68,7 @@ namespace OpenLibrary.Utility
 				command.CommandType = isStoredProcedure ? CommandType.StoredProcedure : CommandType.Text;
 				return command;
 			}
-			catch (ConfigurationErrorsException exception)
+			catch (System.Configuration.ConfigurationErrorsException exception)
 			{
 				throw new OpenLibraryException("Connection string not found", exception, OpenLibraryErrorType.ArgumentNotValidError);
 			}
@@ -84,7 +83,7 @@ namespace OpenLibrary.Utility
 				string key = GenerateKey(connectionString);
 				if (!connectionManager.ContainsKey(key))
 				{
-					var sqlConnectionString = ConfigurationManager.ConnectionStrings[connectionString].ConnectionString;
+					var sqlConnectionString = System.Configuration.ConfigurationManager.ConnectionStrings[connectionString].ConnectionString;
 					connectionManager[key] = new SqlConnection(sqlConnectionString);
 				}
 				var connection = connectionManager[key];
@@ -112,7 +111,7 @@ namespace OpenLibrary.Utility
 			{
 				throw new OpenLibraryException(string.Format("Couldn't connect to database for connectiono string name {0}", connectionString), exception, OpenLibraryErrorType.OperationFailedError);
 			}
-			catch (System.Data.SqlClient.SqlException exception)
+			catch (SqlException exception)
 			{
 				throw new OpenLibraryException(string.Format("Couldn't connect to database for connectiono string name {0}", connectionString), exception, OpenLibraryErrorType.OperationFailedError);
 			}
@@ -143,9 +142,8 @@ namespace OpenLibrary.Utility
 		{
 			transactionManager = transactionManager ?? new Dictionary<string, SqlTransaction>();
 			string key = GenerateKey(connectionString);
-			var connection = OpenConnection(connectionString);
 			if (!transactionManager.ContainsKey(key))
-				transactionManager[key] = (SqlTransaction)null;
+				transactionManager[key] = null;
 			return transactionManager[key];
 		}
 
@@ -175,12 +173,12 @@ namespace OpenLibrary.Utility
 			if (data == null || data is System.String)
 				return null;
 			var type = typeof(T);
-			var mappings = new List<MappingConfiguration>();
+			List<MappingConfiguration> mappings;
 			string sql = null;
 			string tableName = System.Attribute.IsDefined(type, typeof(TableAttribute), true)
 				? ((TableAttribute)type.GetCustomAttributes(typeof(TableAttribute), true)[0]).Name
 				: type.Name;
-			var columns = new List<string>();
+			List<string> columns;
 			switch (query)
 			{
 				case QueryType.Select:
@@ -202,10 +200,10 @@ namespace OpenLibrary.Utility
 					//find primary key
 					var keys = data.ExtractColumnWithAttributes(new[] { typeof(KeyAttribute) });
 					//column primary key must be defined for update query
-					if (keys.Count < 1)
-						throw new System.ArgumentException("There's no primary key (KeyAttribute) defined for entity " + type.Name);
-					else
+					if (keys.Count >= 1)
 						sql += string.Join(" and ", keys.Select(m => string.Format("{0} = {1}", m.ColumnName, "@" + m.ColumnName)));
+					else
+						throw new System.ArgumentException("There's no primary key (KeyAttribute) defined for entity " + type.Name);
 					sql += ";";
 					sql += "select @@ROWCOUNT;";
 					break;
@@ -213,14 +211,12 @@ namespace OpenLibrary.Utility
 					sql = string.Format("delete from {0} where ", tableName);
 					var primaryKeys = data.ExtractColumnWithAttributes(new[] { typeof(KeyAttribute) });
 					//column primary key must be defined for update query
-					if (primaryKeys.Count < 1)
-						throw new System.ArgumentException("There's no primary key (KeyAttribute) defined for entity " + type.Name);
-					else
+					if (primaryKeys.Count >= 1)
 						sql += string.Join(" and ", primaryKeys.Select(m => string.Format("{0} = {1}", m.ColumnName, "@" + m.ColumnName)));
+					else
+						throw new System.ArgumentException("There's no primary key (KeyAttribute) defined for entity " + type.Name);
 					sql += ";";
 					sql += "select @@ROWCOUNT;";
-					break;
-				default:
 					break;
 			}
 			return sql;
@@ -253,8 +249,6 @@ namespace OpenLibrary.Utility
 					excludeAttributes.Add(typeof(ReadOnlyAttribute));
 					break;
 				case QueryType.Any:
-					break;
-				default:
 					break;
 			}
 			var mappings = data.ExtractColumn(excludeAttributes.ToArray());
@@ -470,7 +464,7 @@ namespace OpenLibrary.Utility
 					CloseConnection(connectionString);
 				return output;
 			}
-			catch (System.Data.SqlClient.SqlException exception) { onError(connectionString, exception); }
+			catch (SqlException exception) { onError(connectionString, exception); }
 			catch (System.InvalidCastException exception) { onError(connectionString, exception); }
 			catch (System.InvalidOperationException exception) { onError(connectionString, exception); }
 			catch (System.IO.IOException exception) { onError(connectionString, exception); }
@@ -538,9 +532,7 @@ namespace OpenLibrary.Utility
 				throw new OpenLibraryException("Parameters cannot be primitive data type", OpenLibraryErrorType.ArgumentNotValidError);
 			var output = new List<object>();
 			foreach (var sqlParameter in parameters)
-			{
-				output.Add(ExecuteNonQuery(connectionString, sql, (object)sqlParameter, isStoredProcedure, query));
-			}
+				output.Add(ExecuteNonQuery(connectionString, sql, sqlParameter, isStoredProcedure, query));
 			return output;
 		}
 
@@ -590,7 +582,7 @@ namespace OpenLibrary.Utility
 				if (!IsTransactionStarted(connectionString))
 					CloseConnection(connectionString);
 			}
-			catch (System.Data.SqlClient.SqlException exception) { onError(connectionString, exception); }
+			catch (SqlException exception) { onError(connectionString, exception); }
 			catch (System.InvalidCastException exception) { onError(connectionString, exception); }
 			catch (System.InvalidOperationException exception) { onError(connectionString, exception); }
 			catch (System.IO.IOException exception) { onError(connectionString, exception); }
@@ -635,13 +627,13 @@ namespace OpenLibrary.Utility
 						}
 						catch (System.Exception exception)
 						{
-							throw new OpenLibrary.OpenLibraryException("Failed mapping row to entity", exception, OpenLibraryErrorType.OperationFailedError);
+							throw new OpenLibraryException("Failed mapping row to entity", exception, OpenLibraryErrorType.OperationFailedError);
 						}
 				}
 				if (!IsTransactionStarted(connectionString))
 					CloseConnection(connectionString);
 			}
-			catch (System.Data.SqlClient.SqlException exception) { onError(connectionString, exception); }
+			catch (SqlException exception) { onError(connectionString, exception); }
 			catch (System.InvalidCastException exception) { onError(connectionString, exception); }
 			catch (System.InvalidOperationException exception) { onError(connectionString, exception); }
 			catch (System.IO.IOException exception) { onError(connectionString, exception); }
@@ -693,7 +685,7 @@ namespace OpenLibrary.Utility
 				}
 				return entity;
 			};
-			return Query<T>(connectionString, sql, mapper, isStoredProcedure, parameters);
+			return Query(connectionString, sql, mapper, isStoredProcedure, parameters);
 		}
 
 		/// <summary>
@@ -757,7 +749,7 @@ namespace OpenLibrary.Utility
 		{
 			if (data == null)
 				return null;
-			string sql = BuildSql<T>(data, QueryType.Insert);
+			string sql = BuildSql(data, QueryType.Insert);
 			var output = ExecuteNonQuery(connectionString, sql, false, ToSqlParameter(data, QueryType.Insert));
 			//test wether T has DatabaseGenerated
 			var generatedField = typeof(T).ExtractColumnWithAttributes(new[] { typeof(DatabaseGeneratedAttribute) });
@@ -775,7 +767,7 @@ namespace OpenLibrary.Utility
 		public static object Insert<T>(T data)
 			where T : class
 		{
-			return Insert<T>(DefaultConnectionString, data);
+			return Insert(DefaultConnectionString, data);
 		}
 
 		/// <summary>
@@ -792,7 +784,7 @@ namespace OpenLibrary.Utility
 				throw new OpenLibraryException("Data to be inserted cannot be null", OpenLibraryErrorType.ArgumentNullError);
 			var output = new List<object>();
 			T exampleData = data.First();
-			string sql = BuildSql<T>(exampleData, QueryType.Insert);
+			string sql = BuildSql(exampleData, QueryType.Insert);
 			//test wether T has DatabaseGenerated
 			var generatedField = typeof(T).ExtractColumnWithAttributes(new[] { typeof(DatabaseGeneratedAttribute) });
 			string primaryKey = generatedField.Count > 0 ? generatedField[0].PropertyName : null;
@@ -815,7 +807,7 @@ namespace OpenLibrary.Utility
 		public static List<object> Insert<T>(T[] data)
 			where T : class
 		{
-			return Insert<T>(DefaultConnectionString, data);
+			return Insert(DefaultConnectionString, data);
 		}
 
 		/// <summary>
@@ -830,7 +822,7 @@ namespace OpenLibrary.Utility
 		{
 			try
 			{
-				string sql = BuildSql<T>(data, QueryType.Update);
+				string sql = BuildSql(data, QueryType.Update);
 				var sqlParameter = ToSqlParameter(data, QueryType.Update);
 				return ExecuteNonQuery(connectionString, sql, false, sqlParameter);
 			}
@@ -849,7 +841,7 @@ namespace OpenLibrary.Utility
 		public static object Update<T>(T data)
 			where T : class
 		{
-			return Update<T>(DefaultConnectionString, data);
+			return Update(DefaultConnectionString, data);
 		}
 
 		/// <summary>
@@ -862,7 +854,7 @@ namespace OpenLibrary.Utility
 		public static object Delete<T>(string connectionString, T data)
 			where T : class
 		{
-			string sql = BuildSql<T>(data, QueryType.Delete);
+			string sql = BuildSql(data, QueryType.Delete);
 			var sqlParameter = ToSqlParameter(data, QueryType.Delete);
 			return ExecuteNonQuery(connectionString, sql, false, sqlParameter);
 		}
@@ -876,7 +868,7 @@ namespace OpenLibrary.Utility
 		public static object Delete<T>(T data)
 			where T : class
 		{
-			return Delete<T>(DefaultConnectionString, data);
+			return Delete(DefaultConnectionString, data);
 		}
 	}
 

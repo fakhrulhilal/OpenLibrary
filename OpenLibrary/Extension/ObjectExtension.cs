@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Reflection;
 using System.Collections.Generic;
-using System.Collections;
 
 namespace OpenLibrary.Extension
 {
@@ -201,7 +200,7 @@ namespace OpenLibrary.Extension
 					}
 				}
 				//berikan null jika diperbolehkan
-				if ((sender == null || sender == System.DBNull.Value || (sender is string && string.IsNullOrEmpty((string)sender))) &&
+				if ((sender == System.DBNull.Value || (sender is string && string.IsNullOrEmpty((string)sender))) &&
 					type.IsNullable())
 					return null;
 				//nilai default
@@ -216,14 +215,14 @@ namespace OpenLibrary.Extension
 				//test dengan culture sesuai dengan current thread
 				var testingCulture = culture ?? System.Threading.Thread.CurrentThread.CurrentCulture;
 				var usCulture = new System.Globalization.CultureInfo("en-US");
-				System.Func<dynamic> onError = () =>
+				System.Func<string, dynamic> onError = format =>
 				{
 					//test dengan culture sesuai yang aktif
 					if (culture == null)
-						return To(sender, type, false, dateFormat, testingCulture);
+						return To(sender, type, false, format, testingCulture);
 					//test dengan culture en-US
 					if (!testingCulture.Equals(usCulture))
-						return To(sender, type, false, dateFormat, usCulture);
+						return To(sender, type, false, format, usCulture);
 					return defaultValue();
 				};
 				try
@@ -235,10 +234,10 @@ namespace OpenLibrary.Extension
 									 ? System.DateTime.ParseExact(sender.ToString(), dateFormat, testingCulture)
 									 : System.Convert.ToDateTime(sender);
 				}
-				catch (System.InvalidCastException) { return onError(); }
-				catch (System.ArgumentNullException) { return onError(); }
-				catch (System.ArgumentException) { return onError(); }
-				catch (System.FormatException) { return onError(); }
+				catch (System.InvalidCastException) { return onError(dateFormat); }
+				catch (System.ArgumentNullException) { return onError(dateFormat); }
+				catch (System.ArgumentException) { return onError(dateFormat); }
+				catch (System.FormatException) { return onError(dateFormat); }
 			}
 			#endregion
 			#region Konversi ke string
@@ -427,12 +426,11 @@ namespace OpenLibrary.Extension
 		{
 			var output = new List<MappingConfiguration>();
 			var properties = type.GetProperties(BindingFlags.Instance | BindingFlags.Public);
-			bool skip = false;
 			foreach (var property in properties)
 			{
 				if (System.Attribute.IsDefined(property, typeof(NotMappedAttribute)))
 					continue;
-				skip = false;
+				bool skip = false;
 				if (excludeAttributes != null)
 					foreach (var attribute in excludeAttributes)
 					{
@@ -579,21 +577,20 @@ namespace OpenLibrary.Extension
 			if (data.IsPrimitive())
 				return null;
 			System.Type type = data.GetType();
-			System.Func<dynamic> onDefault = () => System.Activator.CreateInstance(type);
+			var defaultValue = System.Activator.CreateInstance(type);
 			try
 			{
 				var property = data.GetType()
 								   .GetProperty(propertyName,
 												BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.GetProperty);
-				type = property.PropertyType;
 				var output = property.GetValue(data, null);
 				return output.To(property.PropertyType);
 			}
-			catch (System.ArgumentNullException) { return onDefault(); }
-			catch (TargetException) { return onDefault(); }
-			catch (TargetInvocationException) { return onDefault(); }
-			catch (TargetParameterCountException) { return onDefault(); }
-			catch (System.NullReferenceException) { return onDefault(); }
+			catch (System.ArgumentNullException) { return defaultValue; }
+			catch (TargetException) { return defaultValue; }
+			catch (TargetInvocationException) { return defaultValue; }
+			catch (TargetParameterCountException) { return defaultValue; }
+			catch (System.NullReferenceException) { return defaultValue; }
 		}
 
 		/// <summary>

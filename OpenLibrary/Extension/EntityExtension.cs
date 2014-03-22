@@ -27,11 +27,6 @@ namespace OpenLibrary.Extension
 				excludes = new[] { "CreatedTime", "CreatedBy", "ModifiedTime", "ModifiedBy" };
 			List<MappingOption> output = new List<MappingOption>();
 			var properties = type.GetProperties();
-			string fieldName = null;
-			string captionName = null;
-			int? width = null;
-			int? sequence = null;
-			System.Type dataType = null;
 			foreach (var property in properties)
 			{
 				//skip yang diexclude
@@ -43,11 +38,11 @@ namespace OpenLibrary.Extension
 				//hanya extract non complex type
 				if (!property.PropertyType.IsPrimitive())
 					continue;
-				fieldName = null;
-				captionName = null;
-				width = null;
-				sequence = null;
-				dataType = property.PropertyType;
+				string fieldName = null;
+				string captionName = null;
+				int? width = null;
+				int? sequence = null;
+				System.Type dataType = property.PropertyType;
 				var mappingAttributes = property.GetCustomAttributes(typeof(MappingOptionAttribute), false);
 				if (mappingAttributes.Length > 0)
 				{
@@ -63,13 +58,6 @@ namespace OpenLibrary.Extension
 					if (mappingAttribute.Type != null)
 						dataType = mappingAttribute.Type;
 				}
-				//if (string.IsNullOrEmpty(fieldName))
-				//{
-				//	//jika punya atribut column, gunakan nilainya sebagai pengganti nama field
-				//	var columnAttribute = property.GetCustomAttributes(typeof(ColumnAttribute), false);
-				//	if (columnAttribute.Length > 0)
-				//		fieldName = ((ColumnAttribute)columnAttribute[0]).Name;
-				//}
 				if (string.IsNullOrEmpty(captionName))
 				{
 					//jika punya atribut display, gunakan nilainya sebagai pengganti caption

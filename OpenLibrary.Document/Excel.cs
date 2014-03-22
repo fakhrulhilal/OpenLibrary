@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
 using OpenLibrary.Extension;
@@ -141,7 +139,8 @@ namespace OpenLibrary.Document
 			var firstRow = worksheet.GetRow(headerRow - 1);
 			if (firstRow == null)
 				return;
-			int kolom = 0, lastKolom = -1;
+			int kolom = 0;
+			//int lastKolom = -1;
 			while (true)
 			{
 				//ambil nama caption yg muncul
@@ -159,7 +158,7 @@ namespace OpenLibrary.Document
 				//masukkan posisi kolom ke priority
 				if (columnOption != null)
 					columnOption.Sequence = kolom;
-				lastKolom = kolom;
+				//lastKolom = kolom;
 				kolom++;
 			}
 			//sort opsi import untuk mempermudah akses
@@ -184,7 +183,7 @@ namespace OpenLibrary.Document
 		/// <param name="isCaseSensitive">menentukan apakah pencocokan nama header case sensitive atau tidak (default: tidak)</param>
 		/// <param name="dateFormat">format tanggal</param>
 		/// <returns>collection</returns>
-		public static void FromExcel<T>(Stream file, System.Action<T> action, string worksheetName = "", List<MappingOption> importOption = null, int headerRow = 1, bool isBreakOnEmptyRow = false, bool isCaseSensitive = false, string dateFormat = "")
+		public static void FromExcel<T>(Stream file, Action<T> action, string worksheetName = "", List<MappingOption> importOption = null, int headerRow = 1, bool isBreakOnEmptyRow = false, bool isCaseSensitive = false, string dateFormat = "")
 			where T : class, new()
 		{
 			var workbook = new HSSFWorkbook(file);
@@ -192,7 +191,9 @@ namespace OpenLibrary.Document
 			try
 			{
 				PrepareFromExcel<T>(workbook, out worksheet, worksheetName, importOption, headerRow, isCaseSensitive);
-				var mapping = importOption.Where(m => m.Sequence.HasValue).ToList().ToDictionary(m => m.Sequence.Value, m => m);
+				if (importOption == null)
+					importOption = new List<MappingOption>();
+				var mapping = importOption.Where(m => m.Sequence.HasValue).ToList().ToDictionary(m => m.Sequence ?? 0, m => m);
 				int lastKolom = importOption.Max(model => model.Sequence ?? 0);
 				//tidak perlu proses jika dalam caption tidak disebutkan dalam baris pertama
 				if (lastKolom < 0 || mapping.Count < 1)
@@ -274,7 +275,7 @@ namespace OpenLibrary.Document
 		/// <param name="isCaseSensitive">menentukan apakah pencocokan nama header case sensitive atau tidak (default: tidak)</param>
 		/// <param name="dateFormat">format tanggal</param>
 		/// <returns>collection</returns>
-		public static void FromExcel<T>(string filename, System.Action<T> action, string worksheetName = "", List<MappingOption> importOption = null, int headerRow = 1, bool isBreakOnEmptyRow = false, bool isCaseSensitive = false, string dateFormat = "")
+		public static void FromExcel<T>(string filename, Action<T> action, string worksheetName = "", List<MappingOption> importOption = null, int headerRow = 1, bool isBreakOnEmptyRow = false, bool isCaseSensitive = false, string dateFormat = "")
 			where T : class, new()
 		{
 			using (var fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read))
@@ -318,17 +319,17 @@ namespace OpenLibrary.Document
 		/// <param name="isCaseSensitive">menentukan apakah pencocokan nama header case sensitive atau tidak (default: tidak)</param>
 		/// <param name="dateFormat">format tanggal</param>
 		/// <returns>collection</returns>
-		public static void FromExcel(Stream file, System.Action<Dictionary<string, object>> action, string worksheetName = "", List<MappingOption> importOption = null, int headerRow = 1, bool isBreakOnEmptyRow = false, bool isCaseSensitive = false, string dateFormat = "")
+		public static void FromExcel(Stream file, Action<Dictionary<string, object>> action, string worksheetName = "", List<MappingOption> importOption = null, int headerRow = 1, bool isBreakOnEmptyRow = false, bool isCaseSensitive = false, string dateFormat = "")
 		{
 
 			var workbook = new HSSFWorkbook(file);
 			ISheet worksheet;
 			if (importOption == null || importOption.Count < 1)
-				throw new OpenLibrary.OpenLibraryException("Import option must be provided when using dictionary inspite off entity class.", OpenLibraryErrorType.ArgumentNotValidError);
+				throw new OpenLibraryException("Import option must be provided when using dictionary inspite off entity class.", OpenLibraryErrorType.ArgumentNotValidError);
 			try
 			{
 				PrepareFromExcel<object>(workbook, out worksheet, worksheetName, importOption, headerRow, isCaseSensitive);
-				var mapping = importOption.Where(m => m.Sequence.HasValue).ToList().ToDictionary(m => m.Sequence.Value, m => m);
+				var mapping = importOption.Where(m => m.Sequence.HasValue).ToList().ToDictionary(m => m.Sequence ?? 0, m => m);
 				int lastKolom = importOption.Max(model => model.Sequence ?? 0);
 				//tidak perlu proses jika dalam caption tidak disebutkan dalam baris pertama
 				if (lastKolom < 0 || mapping.Count < 1)
@@ -407,7 +408,7 @@ namespace OpenLibrary.Document
 		/// <param name="isCaseSensitive">menentukan apakah pencocokan nama header case sensitive atau tidak (default: tidak)</param>
 		/// <param name="dateFormat">format tanggal</param>
 		/// <returns>collection</returns>
-		public static void FromExcel(string filename, System.Action<Dictionary<string, object>> action, string worksheetName = "", List<MappingOption> importOption = null, int headerRow = 1, bool isBreakOnEmptyRow = false, bool isCaseSensitive = false, string dateFormat = "")
+		public static void FromExcel(string filename, Action<Dictionary<string, object>> action, string worksheetName = "", List<MappingOption> importOption = null, int headerRow = 1, bool isBreakOnEmptyRow = false, bool isCaseSensitive = false, string dateFormat = "")
 		{
 			using (var fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read))
 			{

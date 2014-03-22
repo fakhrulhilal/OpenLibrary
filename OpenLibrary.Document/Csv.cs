@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -155,7 +154,7 @@ namespace OpenLibrary.Document
 			//ambil daftar kolom yang diimport saja
 			List<int> filterKolom = importOption.Where(model => model.Sequence.HasValue).Select(model => model.Sequence != null ? model.Sequence.Value : 0).ToList();
 			int lastKolom = filterKolom.Max();
-			var mapping = importOption.Where(m => m.Sequence.HasValue).ToList().ToDictionary(m => m.Sequence.Value, m => m);
+			var mapping = importOption.Where(m => m.Sequence.HasValue).ToList().ToDictionary(m => m.Sequence ?? 0, m => m);
 			//penampung satu baris output
 			var rowOutput = new T();
 			//var rowInfo = rowOutput.GetType();
@@ -200,11 +199,11 @@ namespace OpenLibrary.Document
 			Delimiter = delimiter;
 			//import option must be provided
 			if (importOption == null || importOption.Count < 1)
-				throw new OpenLibrary.OpenLibraryException("Import option must be provided when using dictionary inspite off entity class.", OpenLibraryErrorType.ArgumentNotValidError);
+				throw new OpenLibraryException("Import option must be provided when using dictionary inspite off entity class.", OpenLibraryErrorType.ArgumentNotValidError);
 			//ambil daftar kolom yang diimport saja
 			List<int> filterKolom = importOption.Where(model => model.Sequence.HasValue).Select(model => model.Sequence != null ? model.Sequence.Value : 0).ToList();
 			int lastKolom = filterKolom.Max();
-			var mapping = importOption.Where(m => m.Sequence.HasValue).ToList().ToDictionary(m => m.Sequence.Value, m => m);
+			var mapping = importOption.Where(m => m.Sequence.HasValue).ToList().ToDictionary(m => m.Sequence ?? 0, m => m);
 			//penampung satu baris output
 			var rowOutput = new Dictionary<string, object>();
 			//var rowInfo = rowOutput.GetType();
@@ -236,7 +235,9 @@ namespace OpenLibrary.Document
 			return !isAllEmpty ? rowOutput : null;
 		}
 
+// ReSharper disable UnusedParameter.Local
 		private static void PrepareFromCsv<T>(Stream file, List<MappingOption> importOption = null, string dateFormat = "yyyy-MM-dd", string delimiter = ",", bool isCaseSensitive = false)
+// ReSharper restore UnusedParameter.Local
 			where T : class, new()
 		{
 			Delimiter = delimiter;
@@ -292,7 +293,9 @@ namespace OpenLibrary.Document
 		{
 			PrepareFromCsv<T>(file, importOption, dateFormat, delimiter, isCaseSensitive);
 			var reader = new StreamReader(file);
-			var mapping = importOption.Where(m => m.Sequence.HasValue).ToList().ToDictionary(m => m.Sequence.Value, m => m);
+			if (importOption == null)
+				importOption = new List<MappingOption>();
+			var mapping = importOption.Where(m => m.Sequence.HasValue).ToList().ToDictionary(m => m.Sequence ?? 0, m => m);
 			//tidak perlu proses jika dalam caption tidak disebutkan dalam baris pertama
 			if (mapping.Count < 1)
 				return;
@@ -366,10 +369,10 @@ namespace OpenLibrary.Document
 		public static void FromCsv(Stream file, System.Action<Dictionary<string, object>> action, List<MappingOption> importOption = null, string dateFormat = "yyyy-MM-dd", string delimiter = ",", bool isCaseSensitive = false)
 		{
 			if (importOption == null || importOption.Count < 1)
-				throw new OpenLibrary.OpenLibraryException("Import option must be provided when using dictionary inspite off entity class.", OpenLibraryErrorType.ArgumentNotValidError);
+				throw new OpenLibraryException("Import option must be provided when using dictionary inspite off entity class.", OpenLibraryErrorType.ArgumentNotValidError);
 			PrepareFromCsv<object>(file, importOption, dateFormat, delimiter, isCaseSensitive);
 			var reader = new StreamReader(file);
-			var mapping = importOption.Where(m => m.Sequence.HasValue).ToList().ToDictionary(m => m.Sequence.Value, m => m);
+			var mapping = importOption.Where(m => m.Sequence.HasValue).ToList().ToDictionary(m => m.Sequence ?? 0, m => m);
 			//tidak perlu proses jika dalam caption tidak disebutkan dalam baris pertama
 			if (mapping.Count < 1)
 				return;
