@@ -18,6 +18,7 @@ namespace OpenLibrary.Utility
 		private static Dictionary<string, SqlConnection> connectionManager;
 		private static Dictionary<string, SqlTransaction> transactionManager;
 		private static string defaultConnectionString;
+		private static Dictionary<System.Type, string> tables;
 		private static System.Action<string, System.Exception> onError = (connectionString, exception) =>
 		{
 			if (IsTransactionStarted(connectionString))
@@ -259,6 +260,34 @@ namespace OpenLibrary.Utility
 				(from mapping in mappings
 				 let value = data.GetFieldValue(mapping.PropertyName)
 				 select new SqlParameter("@" + mapping.ColumnName, value ?? (object)System.DBNull.Value)).ToArray();
+		}
+
+		/// <summary>
+		/// Get table name from entity
+		/// </summary>
+		/// <param name="entity">entity class</param>
+		/// <returns></returns>
+		public static string Table(System.Type entity)
+		{
+			tables = tables ?? new Dictionary<System.Type, string>();
+			if (tables.ContainsKey(entity) && !string.IsNullOrEmpty(tables[entity]))
+				return tables[entity];
+			var tableAttribute = entity.GetCustomAttributes(typeof(TableAttribute), true);
+			string name = tableAttribute.Length > 0
+				? ((TableAttribute)tableAttribute[0]).Name
+				: entity.Name;
+			tables[entity] = name;
+			return name;
+		}
+
+		/// <summary>
+		/// Get table name from entity
+		/// </summary>
+		/// <typeparam name="T">entity class</typeparam>
+		/// <returns></returns>
+		public static string Table<T>()
+		{
+			return Table(typeof(T));
 		}
 
 		#endregion
