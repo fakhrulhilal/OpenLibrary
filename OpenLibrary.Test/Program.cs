@@ -6,6 +6,7 @@ using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using OpenLibrary.Annotation;
+using OpenLibrary.Utility;
 
 namespace OpenLibrary.Test
 {
@@ -119,6 +120,63 @@ namespace OpenLibrary.Test
 				Sql.Update(firstEmployee);
 			}
 			*/
+			string sql = @"
+select 
+	cs.String ConnectionStringName,
+	job.*
+from {0} job
+left join {1} cs on job.ConnectionStringId = cs.Id
+where 
+	job.IsActive = 1 
+order by job.Priority asc";
+			//cari job schedule yg masih aktif
+			var jobs = Sql.Query<JobSchedule>(string.Format(sql, Sql.Table<JobSchedule>(), Sql.Table<ConnectionString>()));
+			foreach (var job in jobs)
+			{
+				var now = System.DateTime.Now;
+				System.DateTime lastJobTime;
+				switch (job.PeriodType)
+				{
+					case PeriodType.Second:
+						lastJobTime = now.AddSeconds(-job.PeriodIncrement);
+						break;
+					case PeriodType.Minute:
+						lastJobTime = now.AddMinutes(-job.PeriodIncrement);
+						break;
+					case PeriodType.Hour:
+						lastJobTime = now.AddHours(-job.PeriodIncrement);
+						break;
+					case PeriodType.Day:
+						lastJobTime = now.AddDays(-job.PeriodIncrement);
+						break;
+					case PeriodType.Month:
+						lastJobTime = now.AddMonths(-job.PeriodIncrement);
+						break;
+					case PeriodType.Year:
+						lastJobTime = now.AddYears(-job.PeriodIncrement);
+						break;
+					default:
+						lastJobTime = now;
+						break;
+				}
+				//eventLog.WriteEntry(string.Format("Looking for a job....found {0} active jobs", jobs.Count));
+				var lastJob =
+					Sql.Query<JobLog>(
+						string.Format("select top 1 * from {0} where JobScheduleId = @Id and ProcessStart >= @lastJobTime",
+									  Sql.Table<JobLog>()),
+						new { job.Id, lastJobTime }).FirstOrDefault();
+				if (lastJob != null)
+					continue;
+				var log = new JobLog
+				{
+					FunctionName = job.FunctionName,
+					JobScheduleId = job.Id,
+					Name = job.Name,
+					ProcessStart = now,
+					StatusType = StatusType.Running
+				};
+				Sql.Insert(log);
+			}
 			string connectionString = "LDAP://adfs.abacus-ind.co.id/CN=Users,DC=abacus-ind,DC=co,DC=id";
 			var matchs = Regex.Matches(connectionString, @"(?:DC=)(?<domain>[\w\-]+)", RegexOptions.IgnoreCase);
 			var domainList = (from Match match in matchs
@@ -129,6 +187,105 @@ namespace OpenLibrary.Test
 	}
 
 	#region Type Helper
+
+	[Table("ConnectionString")]
+	public class ConnectionString : BaseMaster<int>
+	{
+		[Required, Column("Name")]
+		public string Name { get; set; }
+
+		[Required, Column("String")]
+		public string String { get; set; }
+
+		[Column("Description")]
+		public string Description { get; set; }
+
+		public override string ToString()
+		{
+			return Name;
+		}
+	}
+
+	[Table("JobSchedule")]
+	public class JobSchedule : BaseMaster<int>
+	{
+		[Column("ConnectionStringId")]
+		public int? ConnectionStringId { get; set; }
+
+		[ReadOnly, Column("ConnectionStringName")]
+		public string ConnectionString { get; set; }
+
+		[Required, Column("Name")]
+		public string Name { get; set; }
+
+		[Column("IsActive")]
+		public bool IsActive { get; set; }
+
+		[Column("Description")]
+		public string Description { get; set; }
+
+		[Required, Column("FunctionName")]
+		public string FunctionName { get; set; }
+
+		[Column("Priority")]
+		public int Priority { get; set; }
+
+		[Column("PeriodType")]
+		public int IntervalType { get; set; }
+
+		[NotMapped]
+		public PeriodType PeriodType
+		{
+			get { return (PeriodType)IntervalType; }
+			set { IntervalType = (int)value; }
+		}
+
+		[Column("PeriodIncrement")]
+		public int PeriodIncrement { get; set; }
+
+		public override string ToString()
+		{
+			return Name;
+		}
+	}
+
+	[Table("JobLog")]
+	public class JobLog : BaseEntity<int>
+	{
+		[Column("JobScheduleId")]
+		public int? JobScheduleId { get; set; }
+
+		[Column("Name")]
+		[Required]
+		public string Name { get; set; }
+
+		[Column("ProcessStart")]
+		public System.DateTime ProcessStart { get; set; }
+
+		[Column("ProcessEnd")]
+		public System.DateTime? ProcessEnd { get; set; }
+
+		[Column("Status")]
+		public int? Status { get; set; }
+
+		[NotMapped]
+		public StatusType? StatusType
+		{
+			get { return (StatusType?)Status; }
+			set { Status = (int?)value; }
+		}
+
+		[Required, Column("FunctionName")]
+		public string FunctionName { get; set; }
+
+		[Column("Message")]
+		public string Message { get; set; }
+
+		public override string ToString()
+		{
+			return string.Format("{0} ({1})", Name, FunctionName);
+		}
+	}
 
 	[Table("Mst_Employee")]
 	public class Employee
@@ -273,7 +430,50 @@ namespace OpenLibrary.Test
 
 		[Column("ModifiedTime"), ReadOnly]
 		public DateTime? ModifiedTime { get; set; }
-	} 
+	}
+
+	public abstract class BaseEntity<T>
+	{
+		[Key, DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+		public T Id { get; set; }
+	}
+
+	public abstract class BaseMaster<T> : BaseEntity<T>
+	{
+		[Column("CreatedTime")]
+		public System.DateTime CreatedTime { get; set; }
+
+		[Required, Column("CreatedBy"), MaxLength(50)]
+		public string CreatedBy { get; set; }
+
+		[Column("ModifiedTime")]
+		public System.DateTime? ModifiedTime { get; set; }
+
+		[Column("ModifiedBy"), MaxLength(50)]
+		public string ModifiedBy { get; set; }
+	}
+	
+	public enum StatusType
+	{
+		Failed = 0,
+		Running = 1,
+		Success = 2
+	}
+
+	public enum PeriodType
+	{
+		Second = 1,
+
+		Minute = 2,
+
+		Hour = 3,
+
+		Day = 4,
+
+		Month = 5,
+
+		Year = 6
+	}
 
 	#endregion
 }

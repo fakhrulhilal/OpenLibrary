@@ -576,13 +576,13 @@ namespace OpenLibrary.Extension
 		{
 			if (data.IsPrimitive())
 				return null;
-			System.Type type = data.GetType();
-			var defaultValue = System.Activator.CreateInstance(type);
+			object defaultValue = null;
 			try
 			{
 				var property = data.GetType()
 								   .GetProperty(propertyName,
 												BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.GetProperty);
+				defaultValue = property.PropertyType.IsValueType ? System.Activator.CreateInstance(property.PropertyType) : null;
 				var output = property.GetValue(data, null);
 				return output.To(property.PropertyType);
 			}
