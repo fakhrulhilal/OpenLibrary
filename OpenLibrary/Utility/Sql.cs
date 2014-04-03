@@ -54,11 +54,11 @@ namespace OpenLibrary.Utility
 			return string.Format("{0}_{1}", System.Threading.Thread.CurrentThread.ManagedThreadId.ToString(), connectionString);
 		}
 
-		private static SqlCommand Prepare(string connectionString, string sql, bool isStoredProcedure, params SqlParameter[] parameters)
+		private static SqlCommand Prepare(string connectionString, string sql, bool isStoredProcedure, bool isLookConnectionStringInConfig = true, params SqlParameter[] parameters)
 		{
 			try
 			{
-				var connection = OpenConnection(connectionString);
+				var connection = OpenConnection(connectionString, isLookConnectionStringInConfig);
 				var command = new SqlCommand(sql, connection);
 				//pakai transaction jika ada
 				if (IsTransactionStarted(connectionString))
@@ -74,16 +74,19 @@ namespace OpenLibrary.Utility
 			}
 		}
 
-		private static SqlConnection OpenConnection(string connectionString)
+		private static SqlConnection OpenConnection(string connectionString, bool isLookConnectionStringInConfig = true)
 		{
 			connectionManager = connectionManager ?? new Dictionary<string, SqlConnection>();
 			//buka koneksi jika belum ada
 			try
 			{
 				string key = GenerateKey(connectionString);
+				string sqlConnectionString = connectionString;
 				if (!connectionManager.ContainsKey(key))
 				{
-					var sqlConnectionString = System.Configuration.ConfigurationManager.ConnectionStrings[connectionString].ConnectionString;
+					if (isLookConnectionStringInConfig)
+						sqlConnectionString =
+							System.Configuration.ConfigurationManager.ConnectionStrings[connectionString].ConnectionString;
 					connectionManager[key] = new SqlConnection(sqlConnectionString);
 				}
 				var connection = connectionManager[key];
@@ -446,15 +449,16 @@ namespace OpenLibrary.Utility
 		/// <summary>
 		/// Execute non resultset query.
 		/// </summary>
-		/// <param name="connectionString">configuration name in configuration file</param>
+		/// <param name="connectionString">configuration name in configuration file or full connection string</param>
 		/// <param name="sql">sql query or stored procedure name</param>
 		/// <param name="isStoredProcedure">determine wether <paramref name="sql"/> is raw sql or stored procedure name</param>
+		/// <param name="isLookConnectionStringInConfig">determine wether <paramref name="connectionString"/> is connection string in config file or not</param>
 		/// <param name="parameters">parameter when available</param>
 		/// <returns></returns>
 		/// <exception cref="OpenLibrary.OpenLibraryException">See inner exception for detail error</exception>
-		public static object ExecuteNonQuery(string connectionString, string sql, bool isStoredProcedure = false, params SqlParameter[] parameters)
+		public static object ExecuteNonQuery(string connectionString, string sql, bool isStoredProcedure = false, bool isLookConnectionStringInConfig = true, params SqlParameter[] parameters)
 		{
-			var command = Prepare(connectionString, sql, isStoredProcedure, parameters);
+			var command = Prepare(connectionString, sql, isStoredProcedure, isLookConnectionStringInConfig, parameters);
 			command.CommandText = sql;
 			try
 			{
@@ -481,7 +485,7 @@ namespace OpenLibrary.Utility
 		/// <exception cref="OpenLibrary.OpenLibraryException">See inner exception for detail error</exception>
 		public static object ExecuteNonQuery(string sql, bool isStoredProcedure = false, params SqlParameter[] parameters)
 		{
-			return ExecuteNonQuery(DefaultConnectionString, sql, isStoredProcedure, parameters);
+			return ExecuteNonQuery(DefaultConnectionString, sql, isStoredProcedure, parameters: parameters);
 		}
 
 		/// <summary>
@@ -491,16 +495,17 @@ namespace OpenLibrary.Utility
 		/// <param name="sql">sql query or stored procedure name</param>
 		/// <param name="parameters">anonymous object or instance of class (support default DataAnnotation), use <see cref="ReadOnlyAttribute"/> for skip including as SqlParameter.</param>
 		/// <param name="isStoredProcedure">determine wether <paramref name="sql"/> is raw sql or stored procedure name</param>
+		/// <param name="isLookConnectionStringInConfig">determine wether <paramref name="connectionString"/> is connection string in config file or not</param>
 		/// <param name="query"></param>
 		/// <returns></returns>
-		public static object ExecuteNonQuery(string connectionString, string sql, object parameters, bool isStoredProcedure = false, QueryType query = QueryType.Any)
+		public static object ExecuteNonQuery(string connectionString, string sql, object parameters, bool isStoredProcedure = false, QueryType query = QueryType.Any, bool isLookConnectionStringInConfig = true)
 		{
 			if (parameters == null)
 				throw new OpenLibraryException("Parameters cannot be null", OpenLibraryErrorType.ArgumentNullError);
 			if (parameters.IsPrimitive())
 				throw new OpenLibraryException("Parameters cannot be primitive data type", OpenLibraryErrorType.ArgumentNotValidError);
 			var sqlParameters = ToSqlParameter(parameters, query);
-			return ExecuteNonQuery(connectionString, sql, isStoredProcedure, sqlParameters);
+			return ExecuteNonQuery(connectionString, sql, isStoredProcedure, isLookConnectionStringInConfig, sqlParameters);
 		}
 
 		/// <summary>
@@ -523,8 +528,9 @@ namespace OpenLibrary.Utility
 		/// <param name="parameters">anonymous object or instance of class (support default DataAnnotation), use <see cref="ReadOnlyAttribute"/> for skip including as SqlParameter.</param>
 		/// <param name="isStoredProcedure">determine wether <paramref name="sql"/> is raw sql or stored procedure name</param>
 		/// <param name="query">SQL query type</param>
+		/// <param name="isLookConnectionStringInConfig">determine wether <paramref name="connectionString"/> is connection string in config file or not</param>
 		/// <returns></returns>
-		public static List<object> ExecuteNonQuery(string connectionString, string sql, IEnumerable<object> parameters, bool isStoredProcedure = false, QueryType query = QueryType.Any)
+		public static List<object> ExecuteNonQuery(string connectionString, string sql, IEnumerable<object> parameters, bool isStoredProcedure = false, QueryType query = QueryType.Any, bool isLookConnectionStringInConfig = true)
 		{
 			if (parameters == null)
 				throw new OpenLibraryException("Parameters cannot be null", OpenLibraryErrorType.ArgumentNullError);
@@ -532,7 +538,7 @@ namespace OpenLibrary.Utility
 				throw new OpenLibraryException("Parameters cannot be primitive data type", OpenLibraryErrorType.ArgumentNotValidError);
 			var output = new List<object>();
 			foreach (var sqlParameter in parameters)
-				output.Add(ExecuteNonQuery(connectionString, sql, sqlParameter, isStoredProcedure, query));
+				output.Add(ExecuteNonQuery(connectionString, sql, sqlParameter, isStoredProcedure, query, isLookConnectionStringInConfig));
 			return output;
 		}
 
@@ -555,11 +561,12 @@ namespace OpenLibrary.Utility
 		/// <param name="connectionString">configuration name in configuration file</param>
 		/// <param name="sql">sql query or stored procedure name</param>
 		/// <param name="isStoredProcedure">determine wether <paramref name="sql"/> is raw sql or stored procedure name</param>
+		/// <param name="isLookConnectionStringInConfig">determine wether <paramref name="connectionString"/> is connection string in config file or not</param>
 		/// <param name="parameters">parameter when available</param>
 		/// <returns>Key is column name, value is data</returns>
-		public static List<Dictionary<string, object>> Query(string connectionString, string sql, bool isStoredProcedure = false, params SqlParameter[] parameters)
+		public static List<Dictionary<string, object>> Query(string connectionString, string sql, bool isStoredProcedure = false, bool isLookConnectionStringInConfig = true, params SqlParameter[] parameters)
 		{
-			var command = Prepare(connectionString, sql, isStoredProcedure, parameters);
+			var command = Prepare(connectionString, sql, isStoredProcedure, isLookConnectionStringInConfig, parameters);
 			var output = new List<Dictionary<string, object>>();
 			try
 			{
@@ -598,7 +605,7 @@ namespace OpenLibrary.Utility
 		/// <returns>Key is column name, value is data</returns>
 		public static List<Dictionary<string, object>> Query(string sql, bool isStoredProcedure = false, params SqlParameter[] parameters)
 		{
-			return Query(DefaultConnectionString, sql, isStoredProcedure, parameters);
+			return Query(DefaultConnectionString, sql, isStoredProcedure, parameters: parameters);
 		}
 
 		/// <summary>
@@ -608,11 +615,12 @@ namespace OpenLibrary.Utility
 		/// <param name="sql">sql query or stored procedure name</param>
 		/// <param name="mapper">mapping function</param>
 		/// <param name="isStoredProcedure">determine wether <paramref name="sql"/> is raw sql or stored procedure name</param>
+		/// <param name="isLookConnectionStringInConfig">determine wether <paramref name="connectionString"/> is connection string in config file or not</param>
 		/// <param name="parameters">parameter when available</param>
 		/// <returns>collection of strong type object</returns>
-		public static List<T> Query<T>(string connectionString, string sql, System.Func<SqlDataReader, T> mapper, bool isStoredProcedure = false, params SqlParameter[] parameters)
+		public static List<T> Query<T>(string connectionString, string sql, System.Func<SqlDataReader, T> mapper, bool isStoredProcedure = false, bool isLookConnectionStringInConfig = true, params SqlParameter[] parameters)
 		{
-			var command = Prepare(connectionString, sql, isStoredProcedure, parameters);
+			var command = Prepare(connectionString, sql, isStoredProcedure, isLookConnectionStringInConfig, parameters);
 			var output = new List<T>();
 			try
 			{
@@ -651,7 +659,7 @@ namespace OpenLibrary.Utility
 		public static List<T> Query<T>(string sql, System.Func<SqlDataReader, T> mapper, bool isStoredProcedure = false,
 			params SqlParameter[] parameters)
 		{
-			return Query(DefaultConnectionString, sql, mapper, isStoredProcedure, parameters);
+			return Query(DefaultConnectionString, sql, mapper, isStoredProcedure, parameters: parameters);
 		}
 
 		/// <summary>
@@ -661,9 +669,10 @@ namespace OpenLibrary.Utility
 		/// <param name="connectionString">configuration name in configuration file</param>
 		/// <param name="sql">sql query or stored procedure name</param>
 		/// <param name="isStoredProcedure">determine wether <paramref name="sql"/> is raw sql or stored procedure name</param>
+		/// <param name="isLookConnectionStringInConfig">determine wether <paramref name="connectionString"/> is connection string in config file or not</param>
 		/// <param name="parameters">parameter when available</param>
 		/// <returns>collection of strong type object</returns>
-		public static List<T> Query<T>(string connectionString, string sql, bool isStoredProcedure = false, params SqlParameter[] parameters)
+		public static List<T> Query<T>(string connectionString, string sql, bool isStoredProcedure = false, bool isLookConnectionStringInConfig = true, params SqlParameter[] parameters)
 			where T : class, new()
 		{
 			//generate column -> field mapping 
@@ -679,13 +688,13 @@ namespace OpenLibrary.Utility
 					}
 					catch (System.IndexOutOfRangeException)
 					{
-						System.Diagnostics.Debug.WriteLine("Cannot find column {0} for property name {1}", map.ColumnName, map.PropertyName);
+						System.Diagnostics.Trace.WriteLine(string.Format("Cannot find column {0} for property name {1}", map.ColumnName, map.PropertyName));
 						entity.SetFieldValue(map.PropertyName, null);
 					}
 				}
 				return entity;
 			};
-			return Query(connectionString, sql, mapper, isStoredProcedure, parameters);
+			return Query(connectionString, sql, mapper, isStoredProcedure, isLookConnectionStringInConfig, parameters);
 		}
 
 		/// <summary>
@@ -699,7 +708,7 @@ namespace OpenLibrary.Utility
 		public static List<T> Query<T>(string sql, bool isStoredProcedure = false, params SqlParameter[] parameters)
 			where T : class, new()
 		{
-			return Query<T>(DefaultConnectionString, sql, isStoredProcedure, parameters);
+			return Query<T>(DefaultConnectionString, sql, isStoredProcedure, parameters: parameters);
 		}
 
 		/// <summary>
@@ -710,8 +719,9 @@ namespace OpenLibrary.Utility
 		/// <param name="sql">sql query or stored procedure name</param>
 		/// <param name="parameters">anonymous object or instance of class (support default DataAnnotation).</param>
 		/// <param name="isStoredProcedure">determine wether <paramref name="sql"/> is raw sql or stored procedure name</param>
+		/// <param name="isLookConnectionStringInConfig">determine wether <paramref name="connectionString"/> is connection string in config file or not</param>
 		/// <returns>collection of strong type object</returns>
-		public static List<T> Query<T>(string connectionString, string sql, object parameters, bool isStoredProcedure = false)
+		public static List<T> Query<T>(string connectionString, string sql, object parameters, bool isStoredProcedure = false, bool isLookConnectionStringInConfig = true)
 			where T : class, new()
 		{
 			if (parameters == null)
@@ -720,7 +730,7 @@ namespace OpenLibrary.Utility
 				throw new OpenLibraryException("Parameters cannot be primitive data type", OpenLibraryErrorType.ArgumentNotValidError);
 			//create SqlParameter based on anonymous object
 			var sqlParameters = ToSqlParameter(parameters, QueryType.Any);
-			return Query<T>(connectionString, sql, isStoredProcedure, sqlParameters);
+			return Query<T>(connectionString, sql, isStoredProcedure, isLookConnectionStringInConfig, sqlParameters);
 		}
 
 		/// <summary>
@@ -743,14 +753,15 @@ namespace OpenLibrary.Utility
 		/// <typeparam name="T">typeof input entity</typeparam>
 		/// <param name="connectionString">configuration name in configuration file</param>
 		/// <param name="data">entity to be inserted</param>
-		/// <returns>Return of <see cref="ExecuteNonQuery(string,string,bool,System.Data.SqlClient.SqlParameter[])"/></returns>
-		public static object Insert<T>(string connectionString, T data)
+		/// <param name="isLookConnectionStringInConfig">determine wether <paramref name="connectionString"/> is connection string in config file or not</param>
+		/// <returns>Return of <see cref="ExecuteNonQuery(string,string,bool,bool,System.Data.SqlClient.SqlParameter[])"/></returns>
+		public static object Insert<T>(string connectionString, T data, bool isLookConnectionStringInConfig = true)
 			where T : class
 		{
 			if (data == null)
 				return null;
 			string sql = BuildSql(data, QueryType.Insert);
-			var output = ExecuteNonQuery(connectionString, sql, false, ToSqlParameter(data, QueryType.Insert));
+			var output = ExecuteNonQuery(connectionString, sql, false, isLookConnectionStringInConfig, ToSqlParameter(data, QueryType.Insert));
 			//test wether T has DatabaseGenerated
 			var generatedField = typeof(T).ExtractColumnWithAttributes(new[] { typeof(DatabaseGeneratedAttribute) });
 			if (generatedField.Count > 0)
@@ -763,7 +774,7 @@ namespace OpenLibrary.Utility
 		/// </summary>
 		/// <typeparam name="T">typeof input entity</typeparam>
 		/// <param name="data">entity to be inserted</param>
-		/// <returns>Return of <see cref="ExecuteNonQuery(string,string,bool,System.Data.SqlClient.SqlParameter[])"/></returns>
+		/// <returns>Return of <see cref="ExecuteNonQuery(string,string,bool,bool,System.Data.SqlClient.SqlParameter[])"/></returns>
 		public static object Insert<T>(T data)
 			where T : class
 		{
@@ -776,8 +787,9 @@ namespace OpenLibrary.Utility
 		/// <typeparam name="T">typeof input entity</typeparam>
 		/// <param name="connectionString">configuration name in configuration file</param>
 		/// <param name="data">entities to be inserted</param>
-		/// <returns>Return of <see cref="ExecuteNonQuery(string,string,bool,System.Data.SqlClient.SqlParameter[])"/></returns>
-		public static List<object> Insert<T>(string connectionString, T[] data)
+		/// <param name="isLookConnectionStringInConfig">determine wether <paramref name="connectionString"/> is connection string in config file or not</param>
+		/// <returns>Return of <see cref="ExecuteNonQuery(string,string,bool,bool,System.Data.SqlClient.SqlParameter[])"/></returns>
+		public static List<object> Insert<T>(string connectionString, T[] data, bool isLookConnectionStringInConfig = true)
 			where T : class
 		{
 			if (data == null || data.Length < 1)
@@ -790,7 +802,7 @@ namespace OpenLibrary.Utility
 			string primaryKey = generatedField.Count > 0 ? generatedField[0].PropertyName : null;
 			foreach (var item in data)
 			{
-				var rowOutput = ExecuteNonQuery(connectionString, sql, false, ToSqlParameter(item, QueryType.Insert));
+				var rowOutput = ExecuteNonQuery(connectionString, sql, false, isLookConnectionStringInConfig, ToSqlParameter(item, QueryType.Insert));
 				if (!string.IsNullOrEmpty(primaryKey))
 					rowOutput.SetFieldValue(primaryKey, rowOutput);
 				output.Add(rowOutput);
@@ -803,7 +815,7 @@ namespace OpenLibrary.Utility
 		/// </summary>
 		/// <typeparam name="T">typeof input entity</typeparam>
 		/// <param name="data">entities to be inserted</param>
-		/// <returns>Return of <see cref="ExecuteNonQuery(string,string,bool,System.Data.SqlClient.SqlParameter[])"/></returns>
+		/// <returns>Return of <see cref="ExecuteNonQuery(string,string,bool,bool,System.Data.SqlClient.SqlParameter[])"/></returns>
 		public static List<object> Insert<T>(T[] data)
 			where T : class
 		{
@@ -816,15 +828,16 @@ namespace OpenLibrary.Utility
 		/// <typeparam name="T">typeof input entity</typeparam>
 		/// <param name="connectionString">configuration name in configuration file</param>
 		/// <param name="data">entity to be updated</param>
-		/// <returns>Return of <see cref="ExecuteNonQuery(string,string,bool,System.Data.SqlClient.SqlParameter[])"/></returns>
-		public static object Update<T>(string connectionString, T data)
+		/// <param name="isLookConnectionStringInConfig">determine wether <paramref name="connectionString"/> is connection string in config file or not</param>
+		/// <returns>Return of <see cref="ExecuteNonQuery(string,string,bool,bool,System.Data.SqlClient.SqlParameter[])"/></returns>
+		public static object Update<T>(string connectionString, T data, bool isLookConnectionStringInConfig = true)
 			where T : class
 		{
 			try
 			{
 				string sql = BuildSql(data, QueryType.Update);
 				var sqlParameter = ToSqlParameter(data, QueryType.Update);
-				return ExecuteNonQuery(connectionString, sql, false, sqlParameter);
+				return ExecuteNonQuery(connectionString, sql, false, isLookConnectionStringInConfig, sqlParameter);
 			}
 			catch (System.ArgumentException exception)
 			{
@@ -837,7 +850,7 @@ namespace OpenLibrary.Utility
 		/// </summary>
 		/// <typeparam name="T">typeof input entity</typeparam>
 		/// <param name="data">entity to be updated</param>
-		/// <returns>Return of <see cref="ExecuteNonQuery(string,string,bool,System.Data.SqlClient.SqlParameter[])"/></returns>
+		/// <returns>Return of <see cref="ExecuteNonQuery(string,string,bool,bool,System.Data.SqlClient.SqlParameter[])"/></returns>
 		public static object Update<T>(T data)
 			where T : class
 		{
@@ -850,13 +863,14 @@ namespace OpenLibrary.Utility
 		/// <typeparam name="T">typeof input entity</typeparam>
 		/// <param name="connectionString">configuration name in configuration file</param>
 		/// <param name="data">entity to be deleted</param>
-		/// <returns>Return of <see cref="ExecuteNonQuery(string,string,bool,System.Data.SqlClient.SqlParameter[])"/></returns>
-		public static object Delete<T>(string connectionString, T data)
+		/// <param name="isLookConnectionStringInConfig">determine wether <paramref name="connectionString"/> is connection string in config file or not</param>
+		/// <returns>Return of <see cref="ExecuteNonQuery(string,string,bool,bool,System.Data.SqlClient.SqlParameter[])"/></returns>
+		public static object Delete<T>(string connectionString, T data, bool isLookConnectionStringInConfig = true)
 			where T : class
 		{
 			string sql = BuildSql(data, QueryType.Delete);
 			var sqlParameter = ToSqlParameter(data, QueryType.Delete);
-			return ExecuteNonQuery(connectionString, sql, false, sqlParameter);
+			return ExecuteNonQuery(connectionString, sql, false, isLookConnectionStringInConfig, sqlParameter);
 		}
 
 		/// <summary>
@@ -864,7 +878,7 @@ namespace OpenLibrary.Utility
 		/// </summary>
 		/// <typeparam name="T">typeof input entity</typeparam>
 		/// <param name="data">entity to be deleted</param>
-		/// <returns>Return of <see cref="ExecuteNonQuery(string,string,bool,System.Data.SqlClient.SqlParameter[])"/></returns>
+		/// <returns>Return of <see cref="ExecuteNonQuery(string,string,bool,bool,System.Data.SqlClient.SqlParameter[])"/></returns>
 		public static object Delete<T>(T data)
 			where T : class
 		{
