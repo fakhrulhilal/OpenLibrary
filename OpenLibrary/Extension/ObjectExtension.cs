@@ -119,7 +119,7 @@ namespace OpenLibrary.Extension
 		public static dynamic To(this object sender, System.Type type, bool isExcelDate = false, string dateFormat = "", System.Globalization.CultureInfo culture = null)
 		{
 			System.Func<dynamic> defaultValue = () => type == typeof(string) ? default(string) : System.Activator.CreateInstance(type);
-			if (!type.IsPrimitive() || sender == null)
+			if ((!type.IsPrimitive() && !type.IsEnum) || sender == null)
 				return defaultValue();
 			//jika tipe data sumber & tujuan sudah sama, maka tidak perlu dilakukan konversi
 			var sourceType = sender.GetType();

@@ -88,6 +88,10 @@ namespace OpenLibrary.Utility
 					if (isLookConnectionStringInConfig)
 						sqlConnectionString =
 							System.Configuration.ConfigurationManager.ConnectionStrings[connectionString].ConnectionString;
+					//auto parse connection string from edmx
+					var match = System.Text.RegularExpressions.Regex.Match(sqlConnectionString, @"(?:provider connection string=)(?<quot>\&quot\;|'|"")(?<connection>.+)\k<quot>", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+					if (match.Success)
+						sqlConnectionString = match.Groups["connection"].Value;
 					connectionManager[key] = new SqlConnection(sqlConnectionString);
 				}
 				var connection = connectionManager[key];

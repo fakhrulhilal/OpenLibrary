@@ -177,6 +177,15 @@ order by job.Priority asc";
 				};
 				Sql.Insert(log);
 			}
+			string cnn = "metadata=res://*/Database.csdl|res://*/Database.ssdl|res://*/Database.msl;provider=System.Data.SqlClient;provider connection string='Data Source=.;initial catalog=CRM;user id=crm;password=mrc;multipleactiveresultsets=True;App=EntityFramework'satu dua";
+			var cocok = Regex.Match(cnn, @"(?:provider connection string=)(?<quot>\&quot\;|')(?<connection>.+)\k<quot>", RegexOptions.IgnoreCase);
+			if (cocok.Success)
+			{
+				Console.WriteLine(cocok.Groups["connection"].Value);
+			}
+			Console.WriteLine("nilai monthly ke enum => {0}", 5.To<PeriodType>());
+			Console.WriteLine("nilai monthly dari enum => {0}", PeriodType.Month.To<int>());
+			Console.WriteLine("nilai monthly dari string => {0}", "Month".To<PeriodType>());
 			string connectionString = "LDAP://adfs.abacus-ind.co.id/CN=Users,DC=abacus-ind,DC=co,DC=id";
 			var matchs = Regex.Matches(connectionString, @"(?:DC=)(?<domain>[\w\-]+)", RegexOptions.IgnoreCase);
 			var domainList = (from Match match in matchs
