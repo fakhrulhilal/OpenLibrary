@@ -14,6 +14,7 @@ namespace OpenLibrary.Document
 	/// </summary>
 	public class Excel
 	{
+		// ReSharper disable EmptyGeneralCatchClause
 		/// <summary>
 		/// Buat file excel dari data
 		/// </summary>
@@ -86,7 +87,7 @@ namespace OpenLibrary.Document
 			where T : class
 		{
 			var fileStream = new FileStream(filename, FileMode.Create, FileAccess.Write);
-			var output = ToExcel<T>(data, worksheetName: worksheetName, exportOption: exportOption, formatType: formatType);
+			var output = ToExcel(data, worksheetName, exportOption, formatType);
 			output.Seek(0, SeekOrigin.Begin);
 			output.CopyTo(fileStream);
 			fileStream.Close();
@@ -221,12 +222,20 @@ namespace OpenLibrary.Document
 							isAllEmpty = false;
 						//konversi tipe data dari excel sesuai yang didefinisikan object output
 						//langsung set nilainya
-						rowOutput.SetFieldValue(mapping[kolom].Field, nilai, true, dateFormat);
+						try
+						{
+							rowOutput.SetFieldValue(mapping[kolom].Field, nilai, true, dateFormat);
+						}
+						catch { }
 					}
 					//tambahkan ke hasil satu baris ke output
 					//hanya tambahkan jika satu baris ada isinya semua
 					if (!isAllEmpty)
-						action(rowOutput);
+						try
+						{
+							action(rowOutput);
+						}
+						catch { }
 					if (isAllEmpty && isBreakOnEmptyRow)
 						break;
 				}
@@ -256,7 +265,7 @@ namespace OpenLibrary.Document
 			where T : class, new()
 		{
 			var output = new List<T>();
-			FromExcel<T>(file, row => output.Add(row), worksheetName, importOption, headerRow, isBreakOnEmptyRow, isCaseSensitive, dateFormat);
+			FromExcel<T>(file, output.Add, worksheetName, importOption, headerRow, isBreakOnEmptyRow, isCaseSensitive, dateFormat);
 			return output;
 		}
 
@@ -280,7 +289,7 @@ namespace OpenLibrary.Document
 		{
 			using (var fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read))
 			{
-				FromExcel<T>(fileStream, action, worksheetName, importOption, headerRow, isBreakOnEmptyRow, isCaseSensitive, dateFormat);
+				FromExcel(fileStream, action, worksheetName, importOption, headerRow, isBreakOnEmptyRow, isCaseSensitive, dateFormat);
 			}
 		}
 
@@ -357,12 +366,20 @@ namespace OpenLibrary.Document
 							isAllEmpty = false;
 						//konversi tipe data dari excel sesuai yang didefinisikan object output
 						//langsung set nilainya
-						rowOutput[mapping[kolom].Field] = nilai.To(mapping[kolom].Type, true, dateFormat: dateFormat);
+						try
+						{
+							rowOutput[mapping[kolom].Field] = nilai.To(mapping[kolom].Type, true, dateFormat);
+						}
+						catch { }
 					}
 					//tambahkan ke hasil satu baris ke output
 					//hanya tambahkan jika satu baris ada isinya semua
 					if (!isAllEmpty)
-						action(rowOutput);
+						try
+						{
+							action(rowOutput);
+						}
+						catch { }
 					if (isAllEmpty && isBreakOnEmptyRow)
 						break;
 				}
@@ -390,7 +407,7 @@ namespace OpenLibrary.Document
 		public static List<Dictionary<string, object>> FromExcel(Stream file, string worksheetName = "", List<MappingOption> importOption = null, int headerRow = 1, bool isBreakOnEmptyRow = false, bool isCaseSensitive = false, string dateFormat = "")
 		{
 			var output = new List<Dictionary<string, object>>();
-			FromExcel(file, row => output.Add(row), worksheetName, importOption, headerRow, isBreakOnEmptyRow, isCaseSensitive, dateFormat);
+			FromExcel(file, output.Add, worksheetName, importOption, headerRow, isBreakOnEmptyRow, isCaseSensitive, dateFormat);
 			return output;
 		}
 

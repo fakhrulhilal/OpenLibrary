@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Configuration;
+﻿using System.Configuration;
 using System.Web.Mvc;
 
 namespace OpenLibrary.Mvc.Helper
@@ -35,10 +34,11 @@ namespace OpenLibrary.Mvc.Helper
 	/// </summary>
 	public static class ConfigurationHelper
 	{
-		private static Dictionary<string, string> cachedConfig;
-
 		/// <summary>
-		/// Get app configuration (App.Config)
+		/// Get app configuration (App.Config).
+		/// First fallback [Application]:<paramref name="key"/>.
+		/// Second fallback [Environment].<paramref name="key"/>.
+		/// Last fallback [Environment].[Application]:<paramref name="key"/>.
 		/// </summary>
 		/// <param name="key">Get configuration value based on this key</param>
 		/// <returns>string</returns>
@@ -46,33 +46,37 @@ namespace OpenLibrary.Mvc.Helper
 		{
 			if (string.IsNullOrEmpty(key))
 				return string.Empty;
-			cachedConfig = cachedConfig ?? new Dictionary<string, string>();
+			string output = GetConfig(key);
+			if (!string.IsNullOrEmpty(output))
+				return output;
+			//try searching for [Application]:key if empty or not found
+			string applicationName = GetConfig("Application");
+			if (!string.IsNullOrEmpty(applicationName))
+				output = GetConfig(applicationName + ":" + key);
+			if (!string.IsNullOrEmpty(output))
+				return output;
+			//try searching [Environment].key if when not found
+			string environment = GetConfig("Environment");
+			if (!string.IsNullOrEmpty(environment))
+				output = GetConfig(environment + "." + key);
+			if (!string.IsNullOrEmpty(output))
+				return output;
+			//try searching [Environment].[Application]:key
+			if (!string.IsNullOrEmpty(environment) && !string.IsNullOrEmpty(applicationName))
+				output = GetConfig(string.Format("{0}.{1}:{2}", environment, applicationName, key));
+			return !string.IsNullOrEmpty(output) ? output : string.Empty;
+		}
+
+		private static string GetConfig(string key)
+		{
 			try
 			{
-				//search in cache first
-				return cachedConfig[key];
-			}
-			catch (KeyNotFoundException)
-			{
-				//search in web.config section app
-				string appConfig = ConfigurationManager.AppSettings[key];
-				if (string.IsNullOrEmpty(appConfig) && key.Trim().ToLower() != "application")
-				{
-					//try searching for [Application]:key if empty or not found
-					string applicationName = AppConfig("Application");
-// ReSharper disable InconsistentNaming
-					string _appConfig = ConfigurationManager.AppSettings[applicationName + ":" + key];
-// ReSharper restore InconsistentNaming
-					if (!string.IsNullOrEmpty(_appConfig))
-						appConfig = _appConfig;
-				}
-				cachedConfig[key] = appConfig;
-				return appConfig;
+				return ConfigurationManager.AppSettings[key];
 			}
 			catch (System.IndexOutOfRangeException) { }
 			catch (ConfigurationErrorsException) { }
 			catch (System.NullReferenceException) { }
-			return string.Empty;
+			return null;
 		}
 
 		/// <summary>
@@ -114,13 +118,13 @@ namespace OpenLibrary.Mvc.Helper
 		/// <returns>string</returns>
 		public static string CurrentConnectionString()
 		{
-			System.Func<string> onDefault = () => string.Empty;
 			try
 			{
 				return ConfigurationManager.ConnectionStrings[CurrentDatabaseConnection()].ConnectionString;
 			}
-			catch (ConfigurationErrorsException) { return onDefault(); }
-			catch (System.NullReferenceException) { return onDefault(); }
+			catch (ConfigurationErrorsException) { }
+			catch (System.NullReferenceException) { }
+			return string.Empty;
 		}
 	}
 }

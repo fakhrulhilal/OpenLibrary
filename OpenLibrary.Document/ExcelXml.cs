@@ -14,6 +14,7 @@ namespace OpenLibrary.Document
 	/// </summary>
 	public static class ExcelXml
 	{
+		// ReSharper disable EmptyGeneralCatchClause
 		private static Dictionary<Type, string> styleOptions;
 
 		private static Dictionary<Type, string> StyleOptions
@@ -31,9 +32,9 @@ namespace OpenLibrary.Document
 						   { typeof(string), "@" }
 					   };
 			}
-// ReSharper disable UnusedMember.Local
+			// ReSharper disable UnusedMember.Local
 			set { styleOptions = value; }
-// ReSharper restore UnusedMember.Local
+			// ReSharper restore UnusedMember.Local
 		}
 
 		/// <summary>
@@ -134,7 +135,7 @@ namespace OpenLibrary.Document
 			where T : class
 		{
 			using (var fileStream = new FileStream(filename, FileMode.Create, FileAccess.Write))
-			using (var output = ToExcel<T>(data, worksheetName, exportOption, styleOption))
+			using (var output = ToExcel(data, worksheetName, exportOption, styleOption))
 			{
 				output.Seek(0, SeekOrigin.Begin);
 				output.CopyTo(fileStream);
@@ -205,9 +206,9 @@ namespace OpenLibrary.Document
 			where T : class, new()
 		{
 			var workbook = new ExcelPackage(file);
-			ExcelWorksheet worksheet;
 			try
 			{
+				ExcelWorksheet worksheet;
 				PrepareFromExcel<T>(workbook, out worksheet, worksheetName, importOption, headerRow, isCaseSensitive);
 				if (importOption == null)
 					importOption = new List<MappingOption>();
@@ -243,11 +244,19 @@ namespace OpenLibrary.Document
 							isAllEmpty = false;
 						//konversi tipe data dari excel sesuai yang didefinisikan object output
 						//langsung set nilainya
-						rowOutput.SetFieldValue(mapping[kolom].Field, nilai, dateFormat: dateFormat);
+						try
+						{
+							rowOutput.SetFieldValue(mapping[kolom].Field, nilai, dateFormat: dateFormat);
+						}
+						catch { }
 					}
 					//hanya execute fungsi jika satu baris ada isinya semua
 					if (!isAllEmpty)
-						action(rowOutput);
+						try
+						{
+							action(rowOutput);
+						}
+						catch { }
 					if (isAllEmpty && isBreakOnEmptyRow)
 						break;
 				}
@@ -275,8 +284,8 @@ namespace OpenLibrary.Document
 		public static List<T> FromExcel<T>(Stream file, string worksheetName = "", List<MappingOption> importOption = null, int headerRow = 1, bool isBreakOnEmptyRow = false, bool isCaseSensitive = false, string dateFormat = "")
 			where T : class, new()
 		{
-			List<T> output = new List<T>();
-			FromExcel<T>(file, row => output.Add(row), worksheetName, importOption, headerRow, isBreakOnEmptyRow, isCaseSensitive, dateFormat);
+			var output = new List<T>();
+			FromExcel<T>(file, output.Add, worksheetName, importOption, headerRow, isBreakOnEmptyRow, isCaseSensitive, dateFormat);
 			return output;
 		}
 
@@ -322,7 +331,7 @@ namespace OpenLibrary.Document
 		{
 			using (var fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read))
 			{
-				FromExcel<T>(fileStream, action, worksheetName, importOption, headerRow, isBreakOnEmptyRow, isCaseSensitive, dateFormat);
+				FromExcel(fileStream, action, worksheetName, importOption, headerRow, isBreakOnEmptyRow, isCaseSensitive, dateFormat);
 			}
 		}
 
@@ -342,11 +351,11 @@ namespace OpenLibrary.Document
 		public static void FromExcel(Stream file, Action<Dictionary<string, object>> action, string worksheetName = "", List<MappingOption> importOption = null, int headerRow = 1, bool isBreakOnEmptyRow = false, bool isCaseSensitive = false, string dateFormat = "")
 		{
 			var workbook = new ExcelPackage(file);
-			ExcelWorksheet worksheet;
 			if (importOption == null || importOption.Count < 1)
 				throw new OpenLibraryException("Import option must be provided when using dictionary inspite off entity class.", OpenLibraryErrorType.ArgumentNotValidError);
 			try
 			{
+				ExcelWorksheet worksheet;
 				PrepareFromExcel<object>(workbook, out worksheet, worksheetName, importOption, headerRow, isCaseSensitive);
 				var mapping = importOption.Where(m => m.Sequence.HasValue).ToList().ToDictionary(m => m.Sequence ?? 0, m => m);
 				int lastKolom = importOption.Max(model => model.Sequence ?? 0);
@@ -380,11 +389,19 @@ namespace OpenLibrary.Document
 							isAllEmpty = false;
 						//konversi tipe data dari excel sesuai yang didefinisikan object output
 						//langsung set nilainya
-						rowOutput[mapping[kolom].Field] = nilai.To(mapping[kolom].Type, false, dateFormat);
+						try
+						{
+							rowOutput[mapping[kolom].Field] = nilai.To(mapping[kolom].Type, false, dateFormat);
+						}
+						catch { }
 					}
 					//hanya execute fungsi jika satu baris ada isinya semua
 					if (!isAllEmpty)
-						action(rowOutput);
+						try
+						{
+							action(rowOutput);
+						}
+						catch { }
 					if (isAllEmpty && isBreakOnEmptyRow)
 						break;
 				}
@@ -411,7 +428,7 @@ namespace OpenLibrary.Document
 		public static List<Dictionary<string, object>> FromExcel(Stream file, string worksheetName = "", List<MappingOption> importOption = null, int headerRow = 1, bool isBreakOnEmptyRow = false, bool isCaseSensitive = false, string dateFormat = "")
 		{
 			List<Dictionary<string, object>> output = new List<Dictionary<string, object>>();
-			FromExcel(file, row => output.Add(row), worksheetName, importOption, headerRow, isBreakOnEmptyRow, isCaseSensitive, dateFormat);
+			FromExcel(file, output.Add, worksheetName, importOption, headerRow, isBreakOnEmptyRow, isCaseSensitive, dateFormat);
 			return output;
 		}
 
@@ -452,9 +469,7 @@ namespace OpenLibrary.Document
 		public static void FromExcel(string filename, Action<Dictionary<string, object>> action, string worksheetName = "", List<MappingOption> importOption = null, int headerRow = 1, bool isBreakOnEmptyRow = false, bool isCaseSensitive = false, string dateFormat = "")
 		{
 			using (var fileStream = new FileStream(filename, FileMode.Open, FileAccess.Read))
-			{
 				FromExcel(fileStream, action, worksheetName, importOption, headerRow, isBreakOnEmptyRow, isCaseSensitive, dateFormat);
-			}
 		}
 	}
 }

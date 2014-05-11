@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
+    <metadata>
+        <id>OpenLibrary-Contrib</id>
+        <version>1.0.0</version>
+        <title>OpenLibrary Contribution</title>
+        <authors>Fakhrulhilal Maktum</authors>
+        <owners>Fakhrulhilal Maktum</owners>
+        <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+        <projectUrl>https://github.com/fakhrulhilal/OpenLibrary</projectUrl>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <description>Usefull code from around the world</description>
+        <releaseNotes>Version 1.0.0
+- Initial release</releaseNotes>
+        <tags>openlibrary helper</tags>
+        <dependencies>
+            <group targetFramework=".NETFramework4.5">
+				<dependency id="OpenLibrary" version="1.9.0" />
+            </group>
+            <group targetFramework=".NETFramework4.0">
+				<dependency id="OpenLibrary" version="1.9.0" />
+            </group>
+        </dependencies>
+    </metadata>
+    <files>
+        <file src="..\OpenLibrary.Contrib\bin\Release\OpenLibrary.Contrib.dll" target="lib\net45\OpenLibrary.Contrib.dll" />
+        <file src="..\OpenLibrary.Contrib\bin\Release\OpenLibrary.Contrib.pdb" target="lib\net45\OpenLibrary.Contrib.pdb" />
+        <file src="..\OpenLibrary.Contrib\bin\Release\OpenLibrary.Contrib.XML" target="lib\net45\OpenLibrary.Contrib.XML" />
+    </files>
+</package>

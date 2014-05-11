@@ -45,5 +45,20 @@ namespace OpenLibrary.Mvc.Helper
 			}
 			return null;
 		}
+
+		/// <summary>
+		/// Serialize error message to comma delimited string
+		/// </summary>
+		/// <param name="modelState"></param>
+		/// <returns></returns>
+		public static string Serialize(this ModelStateDictionary modelState)
+		{
+			if (modelState.IsValid)
+				return string.Empty;
+			return string.Join(", ", (from i in modelState
+									  where i.Value.Errors.Any()
+									  from error in i.Value.Errors
+									  select error.ErrorMessage));
+		}
 	}
 }

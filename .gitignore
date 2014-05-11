@@ -16,10 +16,10 @@ build/
 [Oo]bj/
 
 # Enable "build/" folder in the NuGet Packages folder since NuGet packages use it for MSBuild targets
-!packages/*/build/
+#!packages/*/build/
 
 # Enable dll addded by nuget
-!/packages/*/lib/*.dll
+#!/packages/*/lib/*.dll
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
@@ -152,3 +152,4 @@ $RECYCLE.BIN/
 
 # Mac crap
 .DS_Store
+/packages/LambdaSqlBuilder.0.9/lib/net40

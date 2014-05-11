@@ -19,23 +19,25 @@ namespace OpenLibrary.Utility
 		/// <param name="availableCharacters">list of available characters</param>
 		/// <param name="size">length of string</param>
 		/// <returns></returns>
+		[System.Obsolete("Use RandomString(int,string) instead")]
 		public static string RandomString(string availableCharacters, int size = 5)
+		{
+			return RandomString(size, availableCharacters);
+		}
+
+		/// <summary>
+		/// Generate random string for certain length with certain characters
+		/// </summary>
+		/// <param name="availableCharacters">list of available characters</param>
+		/// <param name="size">length of string</param>
+		/// <returns></returns>
+		public static string RandomString(int size = 5, string availableCharacters = RANDOM_CHARS)
 		{
 			availableCharacters = string.IsNullOrEmpty(availableCharacters) ? RANDOM_CHARS : new System.String(availableCharacters.Distinct().ToArray());
 			char[] buffer = new char[size];
 			for (int i = 0; i < size; i++)
 				buffer[i] = availableCharacters[random.Next(availableCharacters.Length)];
 			return new System.String(buffer);
-		}
-
-		/// <summary>
-		/// Generate random string for a certain length with alphanumeric character
-		/// </summary>
-		/// <param name="size">length of string</param>
-		/// <returns>string</returns>
-		public static string RandomString(int size = 5)
-		{
-			return RandomString(RANDOM_CHARS, size);
 		}
 
 		/// <summary>
@@ -91,10 +93,22 @@ namespace OpenLibrary.Utility
 		/// <returns>string</returns>
 		public static string FileExtension(this string filename)
 		{
+			if (string.IsNullOrEmpty(filename))
+				return filename;
 			int lastDot = filename.LastIndexOf('.');
 			return lastDot < 0
 				? filename.ToLower()
 				: filename.Substring(lastDot + 1).ToLower();
+		}
+
+		public static string RemoveExtension(this string filename)
+		{
+			if (string.IsNullOrEmpty(filename))
+				return filename;
+			int lastDot = filename.LastIndexOf('.');
+			return lastDot < 0
+				       ? filename
+				       : filename.Substring(0, filename.Length - (filename.Length - lastDot));
 		}
 
 		/// <summary>

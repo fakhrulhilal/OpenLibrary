@@ -217,6 +217,8 @@ namespace OpenLibrary.Extension
 				var usCulture = new System.Globalization.CultureInfo("en-US");
 				System.Func<string, dynamic> onError = format =>
 				{
+					if (sender is double || sender is decimal)
+						return System.DateTime.FromOADate((double)sender);
 					//test dengan culture sesuai yang aktif
 					if (culture == null)
 						return To(sender, type, false, format, testingCulture);
@@ -228,11 +230,11 @@ namespace OpenLibrary.Extension
 				try
 				{
 					dateFormat = dateFormat.Trim();
-					return isExcelDate
-							   ? System.DateTime.FromOADate(System.Convert.ToDouble(sender))
-							   : !string.IsNullOrEmpty(dateFormat)
-									 ? System.DateTime.ParseExact(sender.ToString(), dateFormat, testingCulture)
-									 : System.Convert.ToDateTime(sender);
+					if (isExcelDate)
+						return System.DateTime.FromOADate(System.Convert.ToDouble(sender));
+					if (!string.IsNullOrEmpty(dateFormat) && sender is string)
+						return System.DateTime.ParseExact(sender.ToString(), dateFormat, testingCulture);
+					return System.Convert.ToDateTime(sender);
 				}
 				catch (System.InvalidCastException) { return onError(dateFormat); }
 				catch (System.ArgumentNullException) { return onError(dateFormat); }
@@ -602,7 +604,7 @@ namespace OpenLibrary.Extension
 		/// <param name="isExcelDate">determine wether <paramref name="propertyValue"/> is old excel date (excel prior to 1997), only applied when <paramref name="propertyName"/> in entity is System.DateTime</param>
 		/// <param name="dateFormat">date format (only applied when <paramref name="propertyName"/> in entity is System.DateTime</param>
 		public static void SetFieldValue<T>(this T data, string propertyName, object propertyValue, bool isExcelDate = false, string dateFormat = "")
-			where T : class 
+			where T : class
 		{
 			if (data.IsPrimitive())
 				return;

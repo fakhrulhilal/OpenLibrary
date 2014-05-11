@@ -142,5 +142,31 @@ namespace OpenLibrary.Utility
 			var messageBytes = Encoding.UTF8.GetBytes(message);
 			return HmacSha512(secret, messageBytes);
 		}
+
+		/// <summary>
+		/// Encrypt using SHA1 algorithm
+		/// </summary>
+		/// <param name="message">message to be encrypt</param>
+		/// <returns></returns>
+		public static byte[] Sha1(string message)
+		{
+			using (var encryptor = new SHA1CryptoServiceProvider())
+			{
+				return encryptor.ComputeHash(Encoding.UTF8.GetBytes(message));
+			}
+		}
+
+		/// <summary>
+		/// Encrypt using MD5 algorithm
+		/// </summary>
+		/// <param name="message">message to be encrypt</param>
+		/// <returns></returns>
+		public static byte[] Md5(string message)
+		{
+			using (var encryptor = new MD5CryptoServiceProvider())
+			{
+				return encryptor.ComputeHash(Encoding.UTF8.GetBytes(message));
+			}
+		}
 	}
 }
