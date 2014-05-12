@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
     <metadata>
         <id>OpenLibrary</id>
-        <version>1.9.0</version>
+        <version>1.9.1</version>
         <title>OpenLibrary</title>
         <authors>Fakhrulhilal Maktum</authors>
         <owners>Fakhrulhilal Maktum</owners>
@@ -10,7 +10,10 @@
         <projectUrl>https://github.com/fakhrulhilal/OpenLibrary</projectUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Various utility for C# programmer.</description>
-        <releaseNotes>Version 1.9.0
+        <releaseNotes>Version 1.9.1
+- Fix bug convertion from and to Enum in ObjectExtension
+
+Version 1.9.1
 - Consistance use of Generator Utility
 - Added MD5 &amp; SHA1 for Encryption utility
 

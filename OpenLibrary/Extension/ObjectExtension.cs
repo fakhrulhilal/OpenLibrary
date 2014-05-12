@@ -119,7 +119,7 @@ namespace OpenLibrary.Extension
 		public static dynamic To(this object sender, System.Type type, bool isExcelDate = false, string dateFormat = "", System.Globalization.CultureInfo culture = null)
 		{
 			System.Func<dynamic> defaultValue = () => type == typeof(string) ? default(string) : System.Activator.CreateInstance(type);
-			if ((!type.IsPrimitive() && !type.IsEnum) || sender == null)
+			if ((!type.IsPrimitive() && !type.IsEnum && !(type.IsNullable() && System.Nullable.GetUnderlyingType(type).IsEnum)) || sender == null)
 				return defaultValue();
 			//jika tipe data sumber & tujuan sudah sama, maka tidak perlu dilakukan konversi
 			var sourceType = sender.GetType();
@@ -400,12 +400,13 @@ namespace OpenLibrary.Extension
 						//kondisi khusus: jika tipe source nullable tapi base typenya sama asalkan nilainya ada
 						 (pSource.PropertyType.IsNullable() && sourceType == pOutput.PropertyType && nilai != null) ||
 						//atau jika target nullable tapi base typenya sama dengan tipe data source
-						 (pOutput.PropertyType.IsNullable() && outputType == pSource.PropertyType) ||
+						 (pOutput.PropertyType.IsNullable() && outputType == pSource.PropertyType) //||
 						//diperbolehkan jika target enum dan sumber merupakan bilangan bulat atau sebaliknya
-						 ((pOutput.PropertyType.IsEnum || pOutput.PropertyType.IsInteger()) &&
-						  (sourceType.IsEnum || sourceType.IsInteger() || (pSource.PropertyType.IsNullable() && nilai != null))) ||
-						 ((pOutput.PropertyType.IsNullable() && (outputType.IsEnum || outputType.IsInteger())) &&
-						  (pSource.PropertyType.IsEnum || pSource.PropertyType.IsInteger()))) &&
+						 //((pOutput.PropertyType.IsEnum || pOutput.PropertyType.IsInteger()) &&
+						 // (sourceType.IsEnum || sourceType.IsInteger() || (pSource.PropertyType.IsNullable() && nilai != null))) ||
+						 //((pOutput.PropertyType.IsNullable() && (outputType.IsEnum || outputType.IsInteger())) &&
+						 // (pSource.PropertyType.IsEnum || pSource.PropertyType.IsInteger()))
+						  ) &&
 						pOutput.CanWrite)
 						pOutput.SetValue(destination, nilai.To(pOutput.PropertyType), null);
 				}

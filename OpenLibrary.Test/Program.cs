@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.ComponentModel;
+using System.Linq;
 using System.Text.RegularExpressions;
 using OpenLibrary.Extension;
 using OpenLibrary.Mvc.Helper;
@@ -120,6 +121,7 @@ namespace OpenLibrary.Test
 				Sql.Update(firstEmployee);
 			}
 			*/
+			/*
 			string sql = @"
 select 
 	cs.String ConnectionStringName,
@@ -177,6 +179,7 @@ order by job.Priority asc";
 				};
 				Sql.Insert(log);
 			}
+			*/
 			string cnn = "metadata=res://*/Database.csdl|res://*/Database.ssdl|res://*/Database.msl;provider=System.Data.SqlClient;provider connection string='Data Source=.;initial catalog=CRM;user id=crm;password=mrc;multipleactiveresultsets=True;App=EntityFramework'satu dua";
 			var cocok = Regex.Match(cnn, @"(?:provider connection string=)(?<quot>\&quot\;|')(?<connection>.+)\k<quot>", RegexOptions.IgnoreCase);
 			if (cocok.Success)
@@ -191,11 +194,226 @@ order by job.Priority asc";
 			var domainList = (from Match match in matchs
 							  select match.Groups["domain"].Value).ToList();
 			Console.WriteLine("domain -> {0}", string.Join(".", domainList));
+			var test = new DokuRedirect
+			{
+				Amount = 23802803.00m,
+				OrderId = "78273972983",
+				Password = "kajskldjlf",
+				ResponseCode = DokuResponseCode.NotifyFailed,
+				PaymentChannel = DokuPaymentChannelType.VisaMasterCard,
+				MemberId = "28390-23802-233",
+				RequestUuid = System.Guid.NewGuid().ToString()
+			};
+			var test2 = test.Map<PaymentConfirmation>();
 			Console.ReadLine();
 		}
 	}
 
 	#region Type Helper
+
+	public class DokuRedirect
+	{
+		/// <summary>
+		/// Total Amount
+		/// </summary>
+		public decimal Amount { get; set; }
+
+		/// <summary>
+		/// Transaction ID from merchant
+		/// </summary>
+		public string OrderId { get; set; }
+
+		/// <summary>
+		/// Hashed key combination encryption (use SHA1 method). 
+		/// The hashed key generated from combining these parameters value in this order:
+		/// AMOUNT+MALLID+&lt;shared key&gt;+TRANSIDMERCHANT+RESULTMSG+VERIFYSTATUS
+		/// </summary>
+		public string Password { get; set; }
+
+		/// <summary>
+		/// 0000: success, others failed
+		/// </summary>
+		public DokuResponseCode ResponseCode { get; set; }
+
+		/// <summary>
+		/// See payment channel code list
+		/// </summary>
+		public DokuPaymentChannelType PaymentChannel { get; set; }
+
+		/// <summary>
+		/// SESSIONID
+		/// </summary>
+		public string RequestUuid { get; set; }
+
+		/// <summary>
+		/// Virtual Account identifier for VA transaction
+		/// </summary>
+		public string MemberId { get; set; }
+	}
+
+	/// <summary>
+	/// Doku Payment Channel
+	/// </summary>
+	public enum DokuPaymentChannelType
+	{
+		/// <summary>
+		/// Visa or Master Card
+		/// </summary>
+		[Description("Visa/Master Card")]
+		VisaMasterCard = 1
+	}
+
+	/// <summary>
+	/// Response Code from Doku
+	/// </summary>
+	public enum DokuResponseCode
+	{
+		/// <summary>
+		/// Successful approval
+		/// </summary>
+		[Description("Successful approval")]
+		Success = 0,
+
+		/// <summary>
+		/// Undefined error
+		/// </summary>
+		[Description("Undefined error")]
+		UndefinedError = 5555,
+
+		/// <summary>
+		/// Payment channel not registered
+		/// </summary>
+		[Description("Payment channel not registered")]
+		PaymentChannelNotRegistered = 5501,
+
+		/// <summary>
+		/// Merchant is disabled
+		/// </summary>
+		[Description("Merchant is disabled")]
+		MerchantIsDisabled = 5502,
+
+		/// <summary>
+		/// Maximum attempt 3 times
+		/// </summary>
+		[Description("Maximum attempt 3 times")]
+		MaximumAttempt = 5503,
+
+		/// <summary>
+		/// Words not match
+		/// </summary>
+		[Description("Words not match")]
+		WordsNotMatch = 5504,
+
+		/// <summary>
+		/// Invalid parameter
+		/// </summary>
+		[Description("Invalid parameter")]
+		InvalidParameter = 5505,
+
+		/// <summary>
+		/// Notify failed
+		/// </summary>
+		[Description("Notify failed")]
+		NotifyFailed = 5506,
+
+		/// <summary>
+		/// Invalid parameter detected / Customer click cancel process
+		/// </summary>
+		[Description("Invalid parameter detected / Customer click cancel process")]
+		InvalidParameterDetectedOrCustomerCancel = 5507,
+
+		/// <summary>
+		/// Re-enter transaction
+		/// </summary>
+		[Description("Re-enter transaction")]
+		ReEnterTransaction = 5508,
+
+		/// <summary>
+		/// Payment code already expired
+		/// </summary>
+		[Description("Payment code already expired")]
+		PaymentCodeExpired = 5509,
+
+		/// <summary>
+		/// Cancel by Customer
+		/// </summary>
+		[Description("Cancel by Customer")]
+		CancelledByCustomer = 5510,
+
+		/// <summary>
+		/// Not an error, payment code has not been paid by Customer
+		/// </summary>
+		[Description("Not an error, payment code has not been paid by Customer")]
+		PaymentCodeNotPaidByCustomer = 5511
+	}
+
+	/// <summary>
+	/// Konfirmasi tambahan setelah notifikasi
+	/// </summary>
+	public class PaymentConfirmation
+	{
+		/// <summary>
+		/// ID dari request yg bersangkutan
+		/// </summary>
+		public int? PaymentRequestId { get; set; }
+
+		/// <summary>
+		/// nominal transaksi
+		/// </summary>
+		public decimal Amount { get; set; }
+
+		/// <summary>
+		/// Nomor transaksi
+		/// </summary>
+		public string OrderId { get; set; }
+
+		/// <summary>
+		/// Word secret antara merchant dengan payment gateway
+		/// </summary>
+		public string Password { get; set; }
+
+		/// <summary>
+		/// Kode response dari doku -&gt; 0000: success, other failed
+		/// </summary>
+		public DokuResponseCode? ResponseCode { get; set; }
+
+		/// <summary>
+		/// See payment channel code list
+		/// </summary>
+		public DokuPaymentChannelType? PaymentChannel { get; set; }
+
+		/// <summary>
+		/// Request identifier. Id unik untuk mengidentifikasi message tersebut dengan message lainnya.
+		/// Pada Doku diberi nama SessionID
+		/// </summary>
+		public string RequestUuid { get; set; }
+
+		/// <summary>
+		/// Virtual Account identifier for VA transaction.
+		/// Pada doku diberi nama PaymentCode
+		/// </summary>
+		public string MemberId { get; set; }
+
+		/// <summary>
+		/// Tanggal diinput ke database
+		/// </summary>
+		public System.DateTime CreatedTime { get; set; }
+
+		/// <summary>
+		/// IP yg mengirim request
+		/// </summary>
+		public string CreatorIp { get; set; }
+
+		/// <summary>
+		/// Raw request
+		/// </summary>
+		public string RawRequest { get; set; }
+
+		/// <summary>
+		/// Raw response
+		/// </summary>
+		public string RawResponse { get; set; }
+	}
 
 	[Table("ConnectionString")]
 	public class ConnectionString : BaseMaster<int>
@@ -221,7 +439,7 @@ order by job.Priority asc";
 		[Column("ConnectionStringId")]
 		public int? ConnectionStringId { get; set; }
 
-		[ReadOnly, Column("ConnectionStringName")]
+		[Annotation.ReadOnly, Column("ConnectionStringName")]
 		public string ConnectionString { get; set; }
 
 		[Required, Column("Name")]
@@ -359,7 +577,7 @@ order by job.Priority asc";
 		[Column("xcountry"), Required, MaxLength(10)]
 		public string Country { get; set; }
 
-		[Column("created_datetime"), ReadOnly]
+		[Column("created_datetime"), Annotation.ReadOnly]
 		public DateTime? RegistrationTime { get; set; }
 
 		[Column("xdeposit")]
@@ -428,16 +646,16 @@ order by job.Priority asc";
 		[Column("Telephone"), MaxLength(50)]
 		public string Telephone { get; set; }
 
-		[Column("CreatedBy"), ReadOnly, MaxLength(50)]
+		[Column("CreatedBy"), Annotation.ReadOnly, MaxLength(50)]
 		public string CreatedBy { get; set; }
 
-		[Column("CreatedTime"), ReadOnly, MaxLength]
+		[Column("CreatedTime"), Annotation.ReadOnly, MaxLength]
 		public DateTime CreatedTime { get; set; }
 
-		[Column("ModifiedBy"), ReadOnly, MaxLength(50)]
+		[Column("ModifiedBy"), Annotation.ReadOnly, MaxLength(50)]
 		public string ModifiedBy { get; set; }
 
-		[Column("ModifiedTime"), ReadOnly]
+		[Column("ModifiedTime"), Annotation.ReadOnly]
 		public DateTime? ModifiedTime { get; set; }
 	}
 
