@@ -1,6 +1,9 @@
 ﻿using System.ComponentModel;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Xml;
+using System.Xml.Schema;
+using System.Xml.Serialization;
 using OpenLibrary.Extension;
 using OpenLibrary.Mvc.Helper;
 using System;
@@ -205,11 +208,40 @@ order by job.Priority asc";
 				RequestUuid = System.Guid.NewGuid().ToString()
 			};
 			var test2 = test.Map<PaymentConfirmation>();
+			var test3 = new PaymentGateway
+			{
+				Respond = 0,
+				Status = "Success",
+				Description = "Insert Successfull"
+			};
+			string xml3 = test3.ToXml();
+			string xml2 = @"<pg>
+	<respond>03</respond>
+	<status>Success</status>
+	<description>Insert Successfull</description>
+</pg>";
+			var serializer = new XmlSerializer(typeof(PaymentGateway));
+			var reader = new System.IO.StringReader(xml2);
+			var test4 = serializer.Deserialize(reader) as PaymentGateway;
+			//var test4 = xml2.FromXml<PaymentGateway>();
 			Console.ReadLine();
 		}
 	}
 
 	#region Type Helper
+
+	[XmlRoot("pg")]
+	public class PaymentGateway
+	{
+		[XmlElement("respond")]
+		public int Respond { get; set; }
+
+		[XmlElement("status")]
+		public string Status { get; set; }
+
+		[XmlElement("description")]
+		public string Description { get; set; }
+	}
 
 	public class DokuRedirect
 	{

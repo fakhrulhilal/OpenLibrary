@@ -53,6 +53,8 @@ namespace OpenLibrary.Extension
 		/// <returns>boolean</returns>
 		public static bool IsPrimitive(this System.Type type)
 		{
+			if (type.IsEnum)
+				return true;
 			return new[]
 			{
 				typeof(decimal), typeof(decimal?),
