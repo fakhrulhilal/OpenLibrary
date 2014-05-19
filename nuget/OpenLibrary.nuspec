@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
     <metadata>
         <id>OpenLibrary</id>
-        <version>1.9.2</version>
+        <version>1.9.3</version>
         <title>OpenLibrary</title>
         <authors>Fakhrulhilal Maktum</authors>
         <owners>Fakhrulhilal Maktum</owners>
@@ -10,7 +10,10 @@
         <projectUrl>https://github.com/fakhrulhilal/OpenLibrary</projectUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Various utility for C# programmer.</description>
-        <releaseNotes>Version 1.9.2
+        <releaseNotes>Version 1.9.3
+- Convertion to enum from string now case insensitive
+
+Version 1.9.2
 - Enum now enforced as primitive data type
 - Adding extension to convert from/to XML
 

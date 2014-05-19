@@ -278,7 +278,7 @@ namespace OpenLibrary.Extension
 				{
 					//khusus untuk nullable, convert dulu ke tipe data dasarnya dulu
 					var baseType = type.IsNullable() ? System.Nullable.GetUnderlyingType(type) : type;
-					var output = System.Enum.Parse(baseType, sender.ToString());
+					var output = System.Enum.Parse(baseType, sender.ToString(), true);
 					return baseType == type
 							   ? output
 							   : (System.ComponentModel.TypeDescriptor.GetConverter(type)).ConvertFrom(output);
