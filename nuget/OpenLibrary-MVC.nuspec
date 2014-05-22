@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
     <metadata>
         <id>OpenLibrary-MVC</id>
-        <version>1.8.0</version>
+        <version>1.8.1</version>
         <title>OpenLibrary MVC</title>
         <authors>Fakhrulhilal Maktum</authors>
         <owners>Fakhrulhilal Maktum</owners>
@@ -10,7 +10,10 @@
         <projectUrl>https://github.com/fakhrulhilal/OpenLibrary</projectUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Various utility for ASP.NET MVC framework (helper, filter, model binder, etc).</description>
-        <releaseNotes>Version 1.8.0
+        <releaseNotes>Version 1.8.1
+- Fix bug for PaginationHelper not showing
+
+Version 1.8.0
 - ConfigurationHelper now support multi environment (disable cached)
 - Added function to get client IP address in ControllerHelper
 

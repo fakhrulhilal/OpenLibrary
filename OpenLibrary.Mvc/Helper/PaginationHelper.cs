@@ -123,8 +123,8 @@ namespace OpenLibrary.Mvc.Helper
 		/// <param name="baseUrl">additional base url</param>
 		/// <param name="htmlStyles">HTML paging styles</param>
 		/// <returns></returns>
-		public static string Paginate(out int offsetItem, int totalItem, int itemPerPage = 20, int currentPage = 1, 
-									  int maxPagePerGroup = 10, string baseUrl = null, 
+		public static string Paginate(out int offsetItem, int totalItem, int itemPerPage = 20, int currentPage = 1,
+									  int maxPagePerGroup = 10, string baseUrl = null,
 									  Dictionary<string, string> htmlStyles = null)
 		{
 			string htmlOutput = "";
@@ -148,9 +148,9 @@ namespace OpenLibrary.Mvc.Helper
 			if (lastChar != "&" && lastChar != "?")
 				baseUrl += "&";
 			//hitung jumlah halaman
-// ReSharper disable RedundantCast
+			// ReSharper disable RedundantCast
 			int totalPage = System.Math.Ceiling((float)totalItem / (float)itemPerPage).To<int>();
-// ReSharper restore RedundantCast
+			// ReSharper restore RedundantCast
 			//paksa ke halaman terakhir jika yang diminta melebihi
 			if (currentPage > totalPage)
 				currentPage = totalPage;
@@ -158,9 +158,9 @@ namespace OpenLibrary.Mvc.Helper
 			if (totalPage <= 1)
 				return string.Empty;
 			//menentukan start awal halaman
-// ReSharper disable RedundantCast
+			// ReSharper disable RedundantCast
 			int temp = System.Math.Floor((float)currentPage / (float)maxPagePerGroup).To<int>();
-// ReSharper restore RedundantCast
+			// ReSharper restore RedundantCast
 			if (currentPage % maxPagePerGroup == 0)
 				temp -= 1;
 			int startPageGroup = temp * maxPagePerGroup + 1;
@@ -210,8 +210,8 @@ namespace OpenLibrary.Mvc.Helper
 		/// <param name="maxPagePerGroup">max page to be shown (will be replaced by ... when over)</param>
 		/// <param name="baseUrl">additional base url (default will be built automatically from controller)</param>
 		/// <returns></returns>
-		public static void Paginate(this Controller controller, 
-			out int offsetItem, int totalItem, int itemPerPage = 20, 
+		public static void Paginate(this Controller controller,
+			out int offsetItem, int totalItem, int itemPerPage = 20,
 			int? currentPage = null, int maxPagePerGroup = 10, string baseUrl = null)
 		{
 			if (!currentPage.HasValue)
@@ -260,9 +260,10 @@ namespace OpenLibrary.Mvc.Helper
 					baseUrl = query.ToString();
 				}
 			}
-			controller.TempData["pagination"] = Paginate(out offsetItem, totalItem, itemPerPage, currentPage.Value,
-														 maxPagePerGroup, baseUrl, 
-														 controller.TempData[PREFIX + "_styles"] as Dictionary<string, string>);
+			controller.TempData[PREFIX + "pagination"] = Paginate(out offsetItem, totalItem, itemPerPage, currentPage.Value,
+			                                                      maxPagePerGroup, baseUrl,
+			                                                      controller.TempData[PREFIX + "_styles"] as
+			                                                      Dictionary<string, string>);
 		}
 
 		/// <summary>
