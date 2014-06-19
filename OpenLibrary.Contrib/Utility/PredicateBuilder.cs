@@ -1,9 +1,7 @@
 ﻿using System.Linq;
 using System.Linq.Expressions;
-using OpenLibrary.Annotation;
-using OpenLibrary.Mvc.ModelBinding;
 
-namespace OpenLibrary.Contrib.Utility
+namespace OpenLibrary.Utility
 {
 	/// <summary>
 	/// Expression predicate builder.
