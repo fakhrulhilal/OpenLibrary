@@ -1,98 +1,109 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
-  <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{50B794C2-F7E5-4CFA-BCB2-165E7413D17E}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>OpenLibrary.Mvc</RootNamespace>
-    <AssemblyName>OpenLibrary.Mvc</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile />
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;NET40</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <DocumentationFile>bin\Release\OpenLibrary.Mvc.XML</DocumentationFile>
-  </PropertyGroup>
-  <ItemGroup>
-    <Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\Newtonsoft.Json.5.0.8\lib\net40\Newtonsoft.Json.dll</HintPath>
-    </Reference>
-    <Reference Include="System" />
-    <Reference Include="System.ComponentModel.DataAnnotations" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Runtime.Caching" />
-    <Reference Include="System.Web" />
-    <Reference Include="System.Web.Http, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
-    <Reference Include="System.Web.Http.WebHost, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
-    <Reference Include="System.Web.Mvc, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
-    <Reference Include="System.Web.WebPages, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Attribute\AccessRightAttribute.cs" />
-    <Compile Include="Attribute\AllowAuthenticatedAttribute.cs" />
-    <Compile Include="Attribute\AllowCharacterAttribute.cs" />
-    <Compile Include="Attribute\AuthApiAttribute.cs" />
-    <Compile Include="Attribute\IAccessRightProvider.cs" />
-    <Compile Include="Attribute\IApiAuthProvider.cs" />
-    <Compile Include="Attribute\PostRedirectGetAttribute.cs" />
-    <Compile Include="Format\CustomDateTimeConverter.cs" />
-    <Compile Include="Format\UnixDateTimeConverter.cs" />
-    <Compile Include="Helper\AjaxHelper.cs" />
-    <Compile Include="Helper\BreadcrumbHelper.cs" />
-    <Compile Include="Helper\ConfigurationHelper.cs" />
-    <Compile Include="Helper\ControllerHelper.cs" />
-    <Compile Include="Helper\EnumHelper.cs" />
-    <Compile Include="Helper\FlashMessageHelper.cs" />
-    <Compile Include="Helper\FormatHelper.cs" />
-    <Compile Include="Helper\FormHelper.cs" />
-    <Compile Include="Helper\HttpHelper.cs" />
-    <Compile Include="Helper\MenuHelper.cs" />
-    <Compile Include="Helper\ModelStateHelper.cs" />
-    <Compile Include="Helper\ObjectHelper.cs" />
-    <Compile Include="Helper\PaginationHelper.cs" />
-    <Compile Include="ModelBinding\DataTablesParamModelBinder.cs" />
-    <Compile Include="ModelBinding\FloatingNumericModelBinder.cs" />
-    <Compile Include="ModelBinding\IllegalCharacterModelBinder.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Utility\ObjectFactory.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\OpenLibrary\OpenLibrary.csproj">
-      <Project>{1faa8792-2672-4202-8ec4-231232b20e8c}</Project>
-      <Name>OpenLibrary</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+	<Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+	<PropertyGroup>
+		<Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+		<Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+		<ProjectGuid>{50B794C2-F7E5-4CFA-BCB2-165E7413D17E}</ProjectGuid>
+		<OutputType>Library</OutputType>
+		<AppDesignerFolder>Properties</AppDesignerFolder>
+		<RootNamespace>OpenLibrary.Mvc</RootNamespace>
+		<AssemblyName>OpenLibrary.Mvc</AssemblyName>
+		<TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+		<FileAlignment>512</FileAlignment>
+		<TargetFrameworkProfile />
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+		<DebugSymbols>true</DebugSymbols>
+		<DebugType>full</DebugType>
+		<Optimize>false</Optimize>
+		<OutputPath>bin\Debug\</OutputPath>
+		<DefineConstants>DEBUG;TRACE</DefineConstants>
+		<ErrorReport>prompt</ErrorReport>
+		<WarningLevel>4</WarningLevel>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release v4.0|AnyCPU' ">
+		<DebugType>pdbonly</DebugType>
+		<Optimize>true</Optimize>
+		<DefineConstants>TRACE;NET40</DefineConstants>
+		<OutputPath>bin\Release\net40</OutputPath>
+		<TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+		<ErrorReport>prompt</ErrorReport>
+		<WarningLevel>4</WarningLevel>
+		<DocumentationFile>bin\Release\net40\OpenLibrary.Mvc.XML</DocumentationFile>
+	</PropertyGroup>
+	<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release v4.5|AnyCPU' ">
+		<DebugType>pdbonly</DebugType>
+		<Optimize>true</Optimize>
+		<DefineConstants></DefineConstants>
+		<OutputPath>bin\Release\net45</OutputPath>
+		<TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+		<ErrorReport>prompt</ErrorReport>
+		<WarningLevel>4</WarningLevel>
+		<DocumentationFile>bin\Release\net45\OpenLibrary.Mvc.XML</DocumentationFile>
+	</PropertyGroup>
+	<ItemGroup>
+		<Reference Include="Newtonsoft.Json, Version=4.5.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+			<SpecificVersion>False</SpecificVersion>
+			<HintPath>..\packages\Newtonsoft.Json.5.0.8\lib\net40\Newtonsoft.Json.dll</HintPath>
+		</Reference>
+		<Reference Include="System" />
+		<Reference Include="System.ComponentModel.DataAnnotations" />
+		<Reference Include="System.Configuration" />
+		<Reference Include="System.Core" />
+		<Reference Include="System.Net.Http" />
+		<Reference Include="System.Runtime.Caching" />
+		<Reference Include="System.Web" />
+		<Reference Include="System.Web.Http, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+		<Reference Include="System.Web.Http.WebHost, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+		<Reference Include="System.Web.Mvc, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+		<Reference Include="System.Web.WebPages, Version=2.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+		<Reference Include="System.Xml.Linq" />
+		<Reference Include="System.Data.DataSetExtensions" />
+		<Reference Include="Microsoft.CSharp" />
+		<Reference Include="System.Data" />
+		<Reference Include="System.Xml" />
+	</ItemGroup>
+	<ItemGroup>
+		<Compile Include="Attribute\AccessRightAttribute.cs" />
+		<Compile Include="Attribute\AllowAuthenticatedAttribute.cs" />
+		<Compile Include="Attribute\AllowCharacterAttribute.cs" />
+		<Compile Include="Attribute\AuthApiAttribute.cs" />
+		<Compile Include="Attribute\IAccessRightProvider.cs" />
+		<Compile Include="Attribute\IApiAuthProvider.cs" />
+		<Compile Include="Attribute\PostRedirectGetAttribute.cs" />
+		<Compile Include="Format\CustomDateTimeConverter.cs" />
+		<Compile Include="Format\UnixDateTimeConverter.cs" />
+		<Compile Include="Helper\AjaxHelper.cs" />
+		<Compile Include="Helper\BreadcrumbHelper.cs" />
+		<Compile Include="Helper\ConfigurationHelper.cs" />
+		<Compile Include="Helper\ControllerHelper.cs" />
+		<Compile Include="Helper\EnumHelper.cs" />
+		<Compile Include="Helper\FlashMessageHelper.cs" />
+		<Compile Include="Helper\FormatHelper.cs" />
+		<Compile Include="Helper\FormHelper.cs" />
+		<Compile Include="Helper\HttpHelper.cs" />
+		<Compile Include="Helper\MenuHelper.cs" />
+		<Compile Include="Helper\ModelStateHelper.cs" />
+		<Compile Include="Helper\ObjectHelper.cs" />
+		<Compile Include="Helper\PaginationHelper.cs" />
+		<Compile Include="ModelBinding\DataTablesParamModelBinder.cs" />
+		<Compile Include="ModelBinding\FloatingNumericModelBinder.cs" />
+		<Compile Include="ModelBinding\IllegalCharacterModelBinder.cs" />
+		<Compile Include="Properties\AssemblyInfo.cs" />
+		<Compile Include="Utility\ObjectFactory.cs" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\OpenLibrary\OpenLibrary.csproj">
+			<Project>{1faa8792-2672-4202-8ec4-231232b20e8c}</Project>
+			<Name>OpenLibrary</Name>
+		</ProjectReference>
+	</ItemGroup>
+	<ItemGroup>
+		<None Include="packages.config" />
+	</ItemGroup>
+	<Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+	<!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">
   </Target>

@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
     <metadata>
         <id>OpenLibrary-Contrib</id>
-        <version>1.0.1</version>
+        <version>1.0.2</version>
         <title>OpenLibrary Contribution</title>
         <authors>Fakhrulhilal Maktum</authors>
         <owners>Fakhrulhilal Maktum</owners>
@@ -23,8 +23,11 @@
         </dependencies>
     </metadata>
     <files>
-        <file src="..\OpenLibrary.Contrib\bin\Release\OpenLibrary.Contrib.dll" target="lib\net45\OpenLibrary.Contrib.dll" />
-        <file src="..\OpenLibrary.Contrib\bin\Release\OpenLibrary.Contrib.pdb" target="lib\net45\OpenLibrary.Contrib.pdb" />
-        <file src="..\OpenLibrary.Contrib\bin\Release\OpenLibrary.Contrib.XML" target="lib\net45\OpenLibrary.Contrib.XML" />
+        <file src="..\OpenLibrary.Contrib\bin\Release\net45\OpenLibrary.Contrib.dll" target="lib\net45\OpenLibrary.Contrib.dll" />
+        <file src="..\OpenLibrary.Contrib\bin\Release\net45\OpenLibrary.Contrib.pdb" target="lib\net45\OpenLibrary.Contrib.pdb" />
+        <file src="..\OpenLibrary.Contrib\bin\Release\net45\OpenLibrary.Contrib.XML" target="lib\net45\OpenLibrary.Contrib.XML" />
+        <file src="..\OpenLibrary.Contrib\bin\Release\net40\OpenLibrary.Contrib.dll" target="lib\net40\OpenLibrary.Contrib.dll" />
+        <file src="..\OpenLibrary.Contrib\bin\Release\net40\OpenLibrary.Contrib.pdb" target="lib\net40\OpenLibrary.Contrib.pdb" />
+        <file src="..\OpenLibrary.Contrib\bin\Release\net40\OpenLibrary.Contrib.XML" target="lib\net40\OpenLibrary.Contrib.XML" />
     </files>
 </package>

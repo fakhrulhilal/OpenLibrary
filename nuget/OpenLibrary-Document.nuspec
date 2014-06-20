@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
     <metadata>
         <id>OpenLibrary-Document</id>
-        <version>1.7.3.2</version>
+        <version>1.7.3.3</version>
         <title>OpenLibrary Document</title>
         <authors>Fakhrulhilal Maktum</authors>
         <owners>Fakhrulhilal Maktum</owners>
@@ -37,8 +37,11 @@ Version 1.4.0:
         </dependencies>
     </metadata>
     <files>
-        <file src="..\OpenLibrary.Document\bin\Release\OpenLibrary.Document.dll" target="lib\net45\OpenLibrary.Document.dll" />
-        <file src="..\OpenLibrary.Document\bin\Release\OpenLibrary.Document.pdb" target="lib\net45\OpenLibrary.Document.pdb" />
-        <file src="..\OpenLibrary.Document\bin\Release\OpenLibrary.Document.XML" target="lib\net45\OpenLibrary.Document.XML" />
+        <file src="..\OpenLibrary.Document\bin\Release\net45\OpenLibrary.Document.dll" target="lib\net45\OpenLibrary.Document.dll" />
+        <file src="..\OpenLibrary.Document\bin\Release\net45\OpenLibrary.Document.pdb" target="lib\net45\OpenLibrary.Document.pdb" />
+        <file src="..\OpenLibrary.Document\bin\Release\net45\OpenLibrary.Document.XML" target="lib\net45\OpenLibrary.Document.XML" />
+        <file src="..\OpenLibrary.Document\bin\Release\net40\OpenLibrary.Document.dll" target="lib\net40\OpenLibrary.Document.dll" />
+        <file src="..\OpenLibrary.Document\bin\Release\net40\OpenLibrary.Document.pdb" target="lib\net40\OpenLibrary.Document.pdb" />
+        <file src="..\OpenLibrary.Document\bin\Release\net40\OpenLibrary.Document.XML" target="lib\net40\OpenLibrary.Document.XML" />
     </files>
 </package>
