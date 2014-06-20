@@ -1,4 +1,5 @@
 
+
 namespace OpenLibrary.Mvc.Helper
 {
 	/// <summary>
@@ -165,5 +166,18 @@ namespace OpenLibrary.Mvc.Helper
 		{
 			return new System.IO.StreamReader(request.InputStream).ReadToEnd();
 		}
+
+#if NET40
+		/// <summary>
+		/// Implement missing extension of MapToIPv4
+		/// </summary>
+		/// <param name="ipAddress"></param>
+		/// <returns></returns>
+		public static System.Net.IPAddress MapToIPv4(this System.Net.IPAddress ipAddress)
+		{
+			//TODO: implement MapToIPv4
+			return new System.Net.IPAddress(0);
+		}
+#endif
 	}
 }
