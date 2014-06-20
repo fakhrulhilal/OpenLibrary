@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace OpenLibrary.Extension
 {
 	/// <summary>
-	/// 
+	/// Decide mapping for source property and destination
 	/// </summary>
 	public class MappingConfiguration
 	{
