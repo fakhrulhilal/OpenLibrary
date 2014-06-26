@@ -11,6 +11,12 @@ namespace OpenLibrary.Mvc.ModelBinding
 	/// </summary>
 	public class AliasModelBinder : DefaultModelBinder
 	{
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="controllerContext"></param>
+		/// <param name="bindingContext"></param>
+		/// <returns></returns>
 		protected override PropertyDescriptorCollection GetModelProperties(ControllerContext controllerContext, ModelBindingContext bindingContext)
 		{
 			var output = base.GetModelProperties(controllerContext, bindingContext);

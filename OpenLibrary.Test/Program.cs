@@ -223,6 +223,9 @@ order by job.Priority asc";
 			var serializer = new XmlSerializer(typeof(PaymentGateway));
 			var reader = new System.IO.StringReader(xml2);
 			var test4 = serializer.Deserialize(reader) as PaymentGateway;
+			Console.WriteLine(test.Describe());
+			Console.WriteLine(test.Describe(new[] { typeof(NotMappedAttribute), typeof(Annotation.ReadOnlyAttribute) }));
+			Console.WriteLine(test.Describe(m => new { m.Amount, m.RequestUuid }));
 			//var test4 = xml2.FromXml<PaymentGateway>();
 			Console.ReadLine();
 		}
@@ -260,6 +263,7 @@ order by job.Priority asc";
 		/// The hashed key generated from combining these parameters value in this order:
 		/// AMOUNT+MALLID+&lt;shared key&gt;+TRANSIDMERCHANT+RESULTMSG+VERIFYSTATUS
 		/// </summary>
+		[Annotation.ReadOnly]
 		public string Password { get; set; }
 
 		/// <summary>
@@ -270,6 +274,7 @@ order by job.Priority asc";
 		/// <summary>
 		/// See payment channel code list
 		/// </summary>
+		[NotMapped]
 		public DokuPaymentChannelType PaymentChannel { get; set; }
 
 		/// <summary>

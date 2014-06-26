@@ -19,8 +19,14 @@ namespace OpenLibrary.Annotation
 			Alias = alias;
 		}
 
+		/// <summary>
+		/// Alias name
+		/// </summary>
 		public string Alias { get; private set; }
 
+		/// <summary>
+		/// Alias name
+		/// </summary>
 		public override object TypeId
 		{
 			get { return Alias; }

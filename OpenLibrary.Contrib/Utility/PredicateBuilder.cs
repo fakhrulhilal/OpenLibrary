@@ -9,7 +9,18 @@ namespace OpenLibrary.Utility
 	/// </summary>
 	public static class PredicateBuilder
 	{
+		/// <summary>
+		/// Set default initial expression to <code>true</code>
+		/// </summary>
+		/// <typeparam name="T">typeof entity</typeparam>
+		/// <returns></returns>
 		public static Expression<System.Func<T, bool>> True<T>() { return f => true; }
+
+		/// <summary>
+		/// Set default initial expression to <code>false</code>
+		/// </summary>
+		/// <typeparam name="T">typeof entity</typeparam>
+		/// <returns></returns>
 		public static Expression<System.Func<T, bool>> False<T>() { return f => false; }
 
 		/// <summary>

@@ -13,6 +13,10 @@ namespace System.ComponentModel.DataAnnotations.Schema
 		/// </summary>
 		public DatabaseGeneratedOption DatabaseGeneratedOption { get; set; }
 		
+		/// <summary>
+		/// Initializes a new instance of the DatabaseGeneratedAttribute class.
+		/// </summary>
+		/// <param name="option">Gets or sets the pattern used to generate values for the property in the database.</param>
 		public DatabaseGeneratedAttribute(DatabaseGeneratedOption option)
 		{
 			DatabaseGeneratedOption = option;
