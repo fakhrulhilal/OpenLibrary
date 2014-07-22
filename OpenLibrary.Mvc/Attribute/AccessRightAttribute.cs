@@ -27,6 +27,17 @@ namespace OpenLibrary.Mvc.Attribute
 		public string AccessObject { get; private set; }
 
 		/// <summary>
+		/// View name for unauthorized access (default: UnauthorizedAccess)
+		/// </summary>
+		public string ViewName { get; set; }
+
+		/// <summary>
+		/// Default enum for mapping between action name to enum <see cref="AccessRight"/> (default: <code>AccessRightType</code>).
+		/// This type must be enum.
+		/// </summary>
+		public System.Type AccessRightType { get; set; }
+
+		/// <summary>
 		/// Set access right with default access object
 		/// </summary>
 		/// <param name="provider">Access right provider implementation</param>
@@ -204,9 +215,22 @@ namespace OpenLibrary.Mvc.Attribute
 			var accessRight = AccessRight;
 			if (!accessRight.HasValue)
 			{
-				AccessRightType accessRightType;
-				if (System.Enum.TryParse(actionName, true, out accessRightType))
-					accessRight = (int)accessRightType;
+				System.Type accessRightType = AccessRightType;
+				if (!AccessRightType.IsEnum)
+				{
+#if DEBUG
+					System.Diagnostics.Debug.WriteLine(string.Format("{0} is not enum, using AccessRightType as default.", AccessRightType.Name));					
+#endif
+					accessRightType = typeof(AccessRightType);
+				}
+				try
+				{
+					accessRight = (int)System.Enum.Parse(accessRightType, actionName, true);
+				}
+				catch
+				{
+					accessRight = 0;
+				}
 			}
 			if (Provider.IsAuthorized(user.Name, accessObject, accessRight.GetValueOrDefault()))
 				return;
@@ -217,7 +241,7 @@ namespace OpenLibrary.Mvc.Attribute
 			response.TrySkipIisCustomErrors = true;
 			filterContext.Result = new ViewResult
 			{
-				ViewName = "UnauthorizedAccess",
+				ViewName = string.IsNullOrEmpty(ViewName) ? "UnauthorizedAccess" : ViewName,
 				TempData = filterContext.Controller.TempData,
 				ViewData = new ViewDataDictionary<UnauthorizedAccessRight>(new UnauthorizedAccessRight
 				{

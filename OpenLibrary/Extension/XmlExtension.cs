@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Xml;
 using System.Xml.Serialization;
 
 namespace OpenLibrary.Extension
@@ -13,19 +14,19 @@ namespace OpenLibrary.Extension
 		/// </summary>
 		/// <typeparam name="T">data type of object</typeparam>
 		/// <param name="data"></param>
+		/// <param name="settings">custom XML serializer setting</param>
 		/// <returns>XML string</returns>
-		public static string ToXml<T>(this T data) where T : class
+		public static string ToXml<T>(this T data, XmlWriterSettings settings = null) where T : class
 		{
 			var serializer = new XmlSerializer(typeof(T));
 			string output;
 			using (var writer = new StringWriter())
+			using (var xmlWriter = XmlWriter.Create(writer, new XmlWriterSettings { OmitXmlDeclaration = true }))
 			{
-				var xmlWriter = System.Xml.XmlWriter.Create(writer);
 				var ns = new XmlSerializerNamespaces();
 				ns.Add("", "");
 				serializer.Serialize(xmlWriter, data, ns);
 				output = writer.ToString();
-				xmlWriter.Close();
 			}
 			return output;
 		}
@@ -38,6 +39,9 @@ namespace OpenLibrary.Extension
 		/// <returns>strong type object</returns>
 		public static T FromXml<T>(this string data) where T : class
 		{
+			if (string.IsNullOrEmpty(data))
+				return default(T);
+			data = data.Trim();
 			var type = typeof(T);
 			var rootAttribute = type.GetCustomAttributes(typeof(XmlRootAttribute), false);
 			var deserializer = rootAttribute.Length > 0

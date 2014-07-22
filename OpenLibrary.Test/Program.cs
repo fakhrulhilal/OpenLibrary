@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
@@ -227,11 +228,468 @@ order by job.Priority asc";
 			Console.WriteLine(test.Describe(new[] { typeof(NotMappedAttribute), typeof(Annotation.ReadOnlyAttribute) }));
 			Console.WriteLine(test.Describe(m => new { m.Amount, m.RequestUuid }));
 			//var test4 = xml2.FromXml<PaymentGateway>();
+			string xml = @"<?xml version=""1.0"" encoding=""UTF-8""?>
+<faspay>
+  	<response>Request List of Payment Gateway</response>
+  	<merchant_id>31019</merchant_id>
+  	<merchant>EVOUCHER</merchant>
+  	<payment_channel>
+    		<pg_code>405</pg_code>
+    		<pg_name>BCA klikPay</pg_name>
+  	</payment_channel>
+  	<payment_channel>
+    		<pg_code>400</pg_code>
+    		<pg_name>BRI MOBILE BANKING</pg_name>
+  	</payment_channel>
+  	<payment_channel>
+    		<pg_code>401</pg_code>
+    		<pg_name>BRI NET-PAY</pg_name>
+  	</payment_channel>
+  	<payment_channel>
+    		<pg_code>402</pg_code>
+    		<pg_name>Permata</pg_name>
+  	</payment_channel>
+  	<payment_channel>
+    		<pg_code>301</pg_code>
+    		<pg_name>TELKOMSEL TCash</pg_name>
+  	</payment_channel>
+  	<response_code>00</response_code>
+  	<response_desc>Sukses</response_desc>
+</faspay>";
+			var serialized = xml.FromXml<FasPayPaymentChannelList>();
+			xml2 = @"<?xml version=""1.0"" encoding=""UTF-8""?>
+<faspay>
+  <response>Transmisi Info Detil Pembelian</response>
+  <trx_id>3113450035231894</trx_id>
+  <merchant_id>31134</merchant_id>
+  <merchant>Patihindo</merchant>
+  <bill_no>E100AEXBMZ</bill_no>
+  <bill_items>
+    <product>Hotel Booking Hotel CITY HUB Room Single</product>
+    <qty>1</qty>
+    <amount>800000</amount>
+    <payment_plan>1</payment_plan>
+    <tenor>1</tenor>
+  </bill_items>
+  <response_code>00</response_code>
+  <response_desc>Sukses</response_desc>
+</faspay>
+";
+			var serialized2 = xml2.FromXml<FasPayInitiate>();
+			var data = new FasPayPaymentChannelList
+			{
+				Response = "Request List of Payment Gateway",
+				Merchant = "EVOUCHER",
+				MerchantId = "31019",
+				ResponseCode = "00",
+				ResponseDescription = "Sukses",
+				Channels = new List<FasPayPaymentChannel>
+				{
+					new FasPayPaymentChannel { Code = "400", Name = "BRI MOBILE BANKING" },
+					new FasPayPaymentChannel { Code = "401", Name = "BRI NET-PAY" },
+					new FasPayPaymentChannel { Code = "402", Name = "Permata" },
+					new FasPayPaymentChannel { Code = "301", Name = "TELKOMSEL TCash" },
+				}
+			};
+			string outputXml = data.ToXml();
 			Console.ReadLine();
 		}
 	}
 
 	#region Type Helper
+
+	[XmlRoot("faspay")]
+	public class FasPayInitiate
+	{
+		[XmlElement("response")]
+		public string Response { get; set; }
+
+		[XmlElement("trx_id")]
+		public string Uuid { get; set; }
+
+		[XmlElement("merchant_id")]
+		public string MerchantId { get; set; }
+
+		[XmlElement("merchant")]
+		public string MerchantName { get; set; }
+
+		[XmlElement("bill_no")]
+		public string OrderId { get; set; }
+
+		[XmlElement("response_code")]
+		public string RspCode
+		{
+			get { return ResponseCode.ToString(); }
+			set { value.To<FasPayResponseCode>(); }
+		}
+
+		[XmlIgnore]
+		public FasPayInitiateResponseCode ResponseCode { get; set; }
+
+		[XmlElement("response_desc")]
+		public string ResponseDescription { get; set; }
+
+		[XmlElement("bill_items")]
+		public List<FasPayInitiateItem> Items { get; set; }
+	}
+
+	[XmlRoot("bill_items")]
+	public class FasPayInitiateItem : PaymentItem
+	{ }
+
+	public class PaymentItem
+	{
+		[Required, XmlElement("product")]
+		public string Product { get; set; }
+
+		[Required, XmlElement("qty")]
+		public int Quantity { get; set; }
+
+		[XmlIgnore]
+		public decimal Amount { get; set; }
+
+		[XmlElement("amount")]
+		public string AmountString
+		{
+			get { return Amount.ToString("0"); }
+			set { Amount = value.To<decimal>(); }
+		}
+
+		[XmlIgnore]
+		public FasPayPaymentPlan PaymentPlan { get; set; }
+
+		[XmlElement("payment_plan")]
+		public int PayPlan
+		{
+			get { return (int)PaymentPlan; }
+			set { PaymentPlan = value.To<FasPayPaymentPlan>(); }
+		}
+
+		[XmlElement("merchant_id")]
+		public string MerchantId { get; set; }
+
+		[XmlElement("tenor")]
+		public int Tenor { get; set; }
+	}
+
+	/// <summary>
+	/// Jenis payment yang disupport FasPay
+	/// </summary>
+	public enum FasPayPaymentMethod
+	{
+		[Description("Credit Card")]
+		CreditCard = 1,
+
+		[Description("Maybank2u")]
+		MayBank2U = 2,
+
+		[Description("FPX (reserved for future)")]
+		Fpx = 3,
+
+		[Description("CUP")]
+		Cup = 4,
+
+		[Description("Kiosk (reserved for future)")]
+		Kiosk = 5,
+
+		[Description("Cash (reserved for future)")]
+		Cash = 6,
+
+		[Description("7-eleven (reserved for future)")]
+		SevenEleven = 7,
+
+		[Description("CIMB Clicks")]
+		CimbClicks = 8,
+
+		[Description("ENets")]
+		ENets = 9,
+
+		[Description("PBB Payment Agent")]
+		PbbPaymentAgent = 10,
+
+		[Description("MIDAZZ Prepaid")]
+		MidazzPrepaid = 11,
+
+		[Description("KlikBCA")]
+		KlikBca = 12,
+
+		[Description("Paypal Express Checkout (reserved for future)")]
+		PaypalExpressCheckout = 13,
+
+		[Description("RHB Payment Gateway")]
+		RhbPaymentGateway = 14
+	}
+
+	/// <summary>
+	/// Response dari FasPay
+	/// </summary>
+	public enum FasPayResponseCode
+	{
+		[Description("Transaction approved")]
+		Approved = 101,
+
+		[Description("Shopper may refer to bank for more information or assistance when the transaction is being declined")]
+		BankDeclined = 102,
+
+		[Description("Shopper may refer to merchant for more information or assistance when the transaction is being declined")]
+		MerchantDeclined = 103,
+
+		[Description("Invalid credit card by customer")]
+		InvalidCardDetails = 104,
+
+		[Description("Customer cancel transaction")]
+		Cancelled = 105,
+
+		[Description("Unknown response return from bank side or Faspay Credit Card system")]
+		Unknown = 106,
+
+		[Description("Transaction is being declined by E-Wallet")]
+		DeclinedByEWallet = 107,
+
+		[Description("Transaction accepted but pending action from shopper to make payment")]
+		CustomerPending = 108
+	}
+
+	/// <summary>
+	/// Metode pembayaran FasPay
+	/// </summary>
+	public enum FasPayPaymentPlan
+	{
+		/// <summary>
+		/// Lunas dimuka
+		/// </summary>
+		FullSettlement = 1,
+
+		/// <summary>
+		/// Cicilan
+		/// </summary>
+		Installment = 2,
+
+		/// <summary>
+		/// Gabungan antara lunas &amp; cicilan
+		/// </summary>
+		Mix = 3
+	}
+
+	/// <summary>
+	/// Asal terminal pembayaran FasPay
+	/// </summary>
+	public enum FasPayTerminal
+	{
+		/// <summary>
+		/// Web
+		/// </summary>
+		[Description("Web")]
+		Web = 10,
+
+		/// <summary>
+		/// Mobile App Blackberry
+		/// </summary>
+		[Description("Mobile App Blackberry")]
+		MobileBlackberry = 20,
+
+		/// <summary>
+		/// Mobile App Android
+		/// </summary>
+		[Description("Mobile App Android")]
+		MobileAndroid = 21,
+
+		/// <summary>
+		/// Mobile AppiOS
+		/// </summary>
+		[Description("Mobile App iOS")]
+		MobileIos = 22,
+
+		/// <summary>
+		/// Mobile App Windows
+		/// </summary>
+		[Description("Mobile App Windows")]
+		MobileWindows = 23,
+
+		/// <summary>
+		/// Mobile App Symbian
+		/// </summary>
+		[Description("Mobile App Symbian")]
+		MobileSymbian = 24,
+
+		/// <summary>
+		/// Tablet App BlackBerry
+		/// </summary>
+		[Description("Tablet App BlackBerry")]
+		TabletBlackBerry = 30,
+
+		/// <summary>
+		/// Tablet App Android
+		/// </summary>
+		[Description("Tablet App Android")]
+		TabletAndroid = 31,
+
+		/// <summary>
+		/// Tablet AppiOS
+		/// </summary>
+		[Description("Tablet App iOS")]
+		TabletIos = 32,
+
+		/// <summary>
+		/// Tablet App Windows
+		/// </summary>
+		[Description("Tablet App Windows")]
+		TabletWindows = 33
+	}
+
+	/// <summary>
+	/// Kode response untuk initiate request payment dari FasPay
+	/// </summary>
+	public enum FasPayInitiateResponseCode
+	{
+		/// <summary>
+		/// Sukses
+		/// </summary>
+		[Description("Sukses")]
+		Sukses = 00,
+
+		/// <summary>
+		/// Invalid Merchant
+		/// </summary>
+		[Description("Invalid Merchant")]
+		InvalidMerchant = 03,
+
+		/// <summary>
+		/// Invalid Amount
+		/// </summary>
+		[Description("Invalid Amount")]
+		InvalidAmount = 13,
+
+		/// <summary>
+		/// Invalid Order
+		/// </summary>
+		[Description("Invalid Order")]
+		InvalidOrder = 14,
+
+		/// <summary>
+		/// Order Cancelled by Merchant/Customer
+		/// </summary>
+		[Description("Order Cancelled by Merchant/Customer")]
+		OrderCancelledByMerchantOrCustomer = 17,
+
+		/// <summary>
+		/// Invalid Customer or MSISDN is not found
+		/// </summary>
+		[Description("Invalid Customer or MSISDN is not found")]
+		InvalidCustomer = 18,
+
+		/// <summary>
+		/// Subscription is Expired
+		/// </summary>
+		[Description("Subscription is Expired")]
+		SubscriptionExpired = 21,
+
+		/// <summary>
+		/// Format Error
+		/// </summary>
+		[Description("Format Error")]
+		FormatError = 30,
+
+		/// <summary>
+		/// Requested Function not Supported
+		/// </summary>
+		[Description("Requested Function not Supported")]
+		UnsupportedFunction = 40,
+
+		/// <summary>
+		/// Order is Expired
+		/// </summary>
+		[Description("Order is Expired")]
+		OrderExpired = 54,
+
+		/// <summary>
+		/// Incorrect User/Password
+		/// </summary>
+		[Description("Incorrect User/Password")]
+		IncorrectUserOrPassword = 55,
+
+		/// <summary>
+		/// Security Violation (from unknown IP-Address)
+		/// </summary>
+		[Description("Security Violation (from unknown IP-Address)")]
+		SecurityViolation = 63,
+
+		/// <summary>
+		/// Not Active / Suspended
+		/// </summary>
+		[Description("Not Active / Suspended")]
+		NotActiveOrSuspended = 56,
+
+		/// <summary>
+		/// internal Error
+		/// </summary>
+		[Description("internal Error")]
+		InternalError = 66,
+
+		/// <summary>
+		/// Unregistered Entity
+		/// </summary>
+		[Description("Unregistered Entity")]
+		UnregisteredEntity = 82,
+
+		/// <summary>
+		/// Parameter is mandatory
+		/// </summary>
+		[Description("Parameter is mandatory")]
+		InvalidParameter = 83,
+
+		/// <summary>
+		/// Unregistered Parameters
+		/// </summary>
+		[Description("Unregistered Parameters")]
+		UnregisteredParameters = 84,
+
+		/// <summary>
+		/// Insufficient Paramaters
+		/// </summary>
+		[Description("Insufficient Paramaters")]
+		InsufficientParamaters = 85,
+
+		/// <summary>
+		/// System Malfunction
+		/// </summary>
+		[Description("System Malfunction")]
+		SystemMalfunction = 96
+	}
+	
+	[XmlRoot("faspay"), Serializable]
+	public class FasPayPaymentChannelList
+	{
+		[XmlElement("response")]
+		public string Response { get; set; }
+
+		[XmlElement("merchant_id")]
+		public string MerchantId { get; set; }
+
+		[XmlElement("merchant")]
+		public string Merchant { get; set; }
+
+		[XmlElement("response_code")]
+		public string ResponseCode { get; set; }
+
+		[XmlElement("response_desc")]
+		public string ResponseDescription { get; set; }
+
+		//[XmlArray("pg_channel")]
+		//[XmlArrayItem("pg_channel", typeof(FasPayPaymentChannel))]
+		[XmlElement("payment_channel")]
+		public List<FasPayPaymentChannel> Channels { get; set; }
+	}
+
+	[XmlRoot("payment_channel"), Serializable]
+	public class FasPayPaymentChannel
+	{
+		[XmlElement("pg_code")]
+		public string Code { get; set; }
+
+		[XmlElement("pg_name")]
+		public string Name { get; set; }
+	}
 
 	[XmlRoot("pg")]
 	public class PaymentGateway

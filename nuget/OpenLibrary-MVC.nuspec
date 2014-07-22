@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
     <metadata>
         <id>OpenLibrary-MVC</id>
-        <version>1.8.1.2</version>
+        <version>1.9.1</version>
         <title>OpenLibrary MVC</title>
         <authors>Fakhrulhilal Maktum</authors>
         <owners>Fakhrulhilal Maktum</owners>
@@ -10,7 +10,15 @@
         <projectUrl>https://github.com/fakhrulhilal/OpenLibrary</projectUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Various utility for ASP.NET MVC framework (helper, filter, model binder, etc).</description>
-        <releaseNotes>Version 1.8.1
+        <releaseNotes>Version 1.9.1
+- Add option to change view name and AccessRightType for mapping between action name to AccessRight constant
+- Move some ControllerHelper from hooking in ControllerBase class to HttpRequestBase
+
+Version 1.9.0
+- Add option to customize enum type for AccessRightAttribute for default mapping between action name and enum type
+- Add option to customize view name for unauthorized request
+		
+Version 1.8.1
 - Fix bug for PaginationHelper not showing
 
 Version 1.8.0
@@ -37,11 +45,11 @@ Version 1.3.2:
         <tags>openlibrary authorize-attribute helper</tags>
         <dependencies>
             <group targetFramework=".NETFramework4.5">
-				<dependency id="OpenLibrary" version="1.7.3" />
+				<dependency id="OpenLibrary" version="1.10.1" />
                 <dependency id="Newtonsoft.Json" version="5.0.8" />
             </group>
             <group targetFramework=".NETFramework4.0">
-				<dependency id="OpenLibrary" version="1.7.3" />
+				<dependency id="OpenLibrary" version="1.10.1" />
                 <dependency id="Newtonsoft.Json" version="5.0.8" />
             </group>
         </dependencies>

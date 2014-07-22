@@ -132,11 +132,7 @@ namespace OpenLibrary.Extension
 					oldString = ((bool)oldValue) ? "yes" : "no";
 					newString = ((bool)newValue) ? "yes" : "no";
 				}
-#if NET40
 				var displayAttribute = property.GetCustomAttributes(typeof(DisplayAttribute), false).Cast<DisplayAttribute>().ToList();
-#else
-				var displayAttribute = property.GetCustomAttributes<DisplayAttribute>().ToList();
-#endif
 				if (displayAttribute.Any())
 					fieldName = displayAttribute.First().GetName();
 				changes.Add(oldString == newString
@@ -160,7 +156,7 @@ namespace OpenLibrary.Extension
 										string emptyString = "(EMPTY)", string noChangeString = "(NO CHANGE)")
 			where T : class
 		{
-			return Compare(oldEntity, newEntity, GetExcluded<T>(excludeAttributes), emptyString, noChangeString);
+			return Compare(oldEntity, newEntity, GetPropertyList<T>(excludeAttributes), emptyString, noChangeString);
 		}
 
 		/// <summary>
@@ -177,7 +173,7 @@ namespace OpenLibrary.Extension
 										string emptyString = "(EMPTY)", string noChangeString = "(NO CHANGE)")
 			where T : class
 		{
-			return Compare(oldEntity, newEntity, GetExcluded(excludeProperties), emptyString, noChangeString);
+			return Compare(oldEntity, newEntity, GetPropertyList(excludeProperties), emptyString, noChangeString);
 		}
 
 		/// <summary>
@@ -223,11 +219,7 @@ namespace OpenLibrary.Extension
 					wordValue = ((System.DateTime)value).ToString("yyyy-MM-dd");
 				else if (value is bool)
 					wordValue = ((bool)value) ? "yes" : "no";
-#if NET40
 				var displayAttribute = property.GetCustomAttributes(typeof(DisplayAttribute), false).Cast<DisplayAttribute>().ToList();
-#else
-				var displayAttribute = property.GetCustomAttributes<DisplayAttribute>().ToList();
-#endif
 				if (displayAttribute.Any())
 					fieldName = displayAttribute.First().GetName();
 				description.Add(string.Format("{0} = {1}", fieldName, wordValue));
@@ -246,7 +238,7 @@ namespace OpenLibrary.Extension
 		public static string Describe<T>(this T entity, System.Func<T, object> excludeProperties, string emptyString = "(EMPTY)")
 			where T : class
 		{
-			return Describe(entity, GetExcluded(excludeProperties), emptyString);
+			return Describe(entity, GetPropertyList(excludeProperties), emptyString);
 		}
 
 		/// <summary>
@@ -260,7 +252,7 @@ namespace OpenLibrary.Extension
 		public static string Describe<T>(this T entity, System.Type[] excludeAttributes, string emptyString = "(EMPTY)")
 			where T : class
 		{
-			return Describe(entity, GetExcluded<T>(excludeAttributes), emptyString);
+			return Describe(entity, GetPropertyList<T>(excludeAttributes), emptyString);
 		}
 
 		/// <summary>
@@ -275,39 +267,45 @@ namespace OpenLibrary.Extension
 			return Describe(entity, new string[0], emptyString);
 		}
 
-		private static string[] GetExcluded<T>(System.Func<T, object> excludeProperties) where T : class
+		/// <summary>
+		/// Get string list of selected properties
+		/// </summary>
+		/// <typeparam name="T">entity class</typeparam>
+		/// <param name="properties">property list</param>
+		/// <returns></returns>
+		public static string[] GetPropertyList<T>(System.Func<T, object> properties) where T : class
 		{
-			var excludes = new string[0];
-			if (excludeProperties != null)
+			var output = new string[0];
+			if (properties != null)
 			{
-				var keySelector = excludeProperties(System.Activator.CreateInstance<T>());
-				var properties = keySelector.GetType().GetProperties(BindingFlags.GetProperty | BindingFlags.Instance | BindingFlags.Public);
-				if (properties.Length > 0)
-					excludes = properties.Select(m => m.Name).ToArray();
+				var keySelector = properties(System.Activator.CreateInstance<T>());
+				var selectedProperties = keySelector.GetType().GetProperties(BindingFlags.GetProperty | BindingFlags.Instance | BindingFlags.Public);
+				if (selectedProperties.Length > 0)
+					output = selectedProperties.Select(m => m.Name).ToArray();
 			}
-			return excludes;
+			return output;
 		}
 
-		private static string[] GetExcluded<T>(System.Type[] excludeAttributes) where T : class 
+		/// <summary>
+		/// Get string list of selected properties which has certain attributes
+		/// </summary>
+		/// <typeparam name="T">entity class</typeparam>
+		/// <param name="attributes">filter property by attribute</param>
+		/// <returns></returns>
+		public static string[] GetPropertyList<T>(System.Type[] attributes) where T : class 
 		{
-			var excludes = new List<string>();
+			var outputProperties = new List<string>();
 			//only attribute type
-			var excludeList = excludeAttributes.Where(type => typeof(System.Attribute).IsAssignableFrom(type)).ToList();
-			var properties = typeof(T).GetProperties(BindingFlags.GetProperty | BindingFlags.Instance | BindingFlags.Public);
-			if (excludeList.Count > 0 && properties.Length > 0)
+			var excludeList = attributes.Where(type => typeof(System.Attribute).IsAssignableFrom(type)).ToList();
+			var selectedProperties = typeof(T).GetProperties(BindingFlags.GetProperty | BindingFlags.Instance | BindingFlags.Public);
+			if (excludeList.Count > 0 && selectedProperties.Length > 0)
 			{
 				//only exclude property which certain attribute
-#if NET40
-				excludes.AddRange(from property in properties
+				outputProperties.AddRange(from property in selectedProperties
 								  where excludeList.Any(type => property.IsDefined(type, false))
 								  select property.Name);
-#else
-				excludes.AddRange(from property in properties
-								  where excludeList.Any(property.IsDefined)
-								  select property.Name);
-#endif
 			}
-			return excludes.ToArray();
+			return outputProperties.ToArray();
 		}
 	}
 }

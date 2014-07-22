@@ -25,12 +25,12 @@ Version 1.4.0:
         <tags>openlibrary excel-importer csv-importer excel-exporter csv-exporter</tags>
         <dependencies>
             <group targetFramework=".NETFramework4.5">
-				<dependency id="OpenLibrary" version="1.7.3" />
+				<dependency id="OpenLibrary" version="1.10.1" />
 				<dependency id="EPPlus" version="3.1.3.3" />
 				<dependency id="NPOI" version="1.2.5" />
             </group>
             <group targetFramework=".NETFramework4.0">
-				<dependency id="OpenLibrary" version="1.7.3" />
+				<dependency id="OpenLibrary" version="1.10.1" />
 				<dependency id="EPPlus" version="3.1.3.3" />
 				<dependency id="NPOI" version="1.2.5" />
             </group>

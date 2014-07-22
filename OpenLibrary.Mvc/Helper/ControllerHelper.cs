@@ -110,9 +110,20 @@ namespace OpenLibrary.Mvc.Helper
 		/// </summary>
 		/// <param name="controller"></param>
 		/// <returns>Client IP</returns>
+		[System.Obsolete("Use Controller.Request.IpAddress() instead")]
 		public static string GetClientIpAddress(this System.Web.Mvc.Controller controller)
 		{
-			string ip = controller.Request.UserHostAddress ?? string.Empty;
+			return controller.Request.IpAddress();
+		}
+
+		/// <summary>
+		/// Get remote client IP
+		/// </summary>
+		/// <param name="request"></param>
+		/// <returns>Client IP</returns>
+		public static string IpAddress(this System.Web.HttpRequestBase request)
+		{
+			string ip = request.UserHostAddress ?? string.Empty;
 			try
 			{
 				var temp = System.Net.Dns.GetHostAddresses(ip);
@@ -145,12 +156,24 @@ namespace OpenLibrary.Mvc.Helper
 		/// <param name="controller"></param>
 		/// <param name="ip">IP address</param>
 		/// <returns></returns>
+		[System.Obsolete("Use Controller.Request.Hostname() instead")]
 		public static string GetClientHostname(this System.Web.Mvc.Controller controller, string ip = "")
+		{
+			return controller.Request.Hostname(ip);
+		}
+
+		/// <summary>
+		/// Get remote hostname 
+		/// </summary>
+		/// <param name="request"></param>
+		/// <param name="ip">IP address</param>
+		/// <returns></returns>
+		public static string Hostname(this System.Web.HttpRequestBase request, string ip = "")
 		{
 			try
 			{
 				if (string.IsNullOrEmpty(ip))
-					ip = controller.GetClientIpAddress();
+					ip = request.IpAddress();
 				return System.Net.Dns.GetHostEntry(ip).HostName;
 			}
 			catch (System.Exception) { }

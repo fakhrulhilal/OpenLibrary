@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
     <metadata>
         <id>OpenLibrary</id>
-        <version>1.10.0</version>
+        <version>1.10.2</version>
         <title>OpenLibrary</title>
         <authors>Fakhrulhilal Maktum</authors>
         <owners>Fakhrulhilal Maktum</owners>
@@ -10,7 +10,10 @@
         <projectUrl>https://github.com/fakhrulhilal/OpenLibrary</projectUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Various utility for C# programmer.</description>
-        <releaseNotes>Version 1.10.0
+        <releaseNotes>Version 1.10.2
+- Minor changes for XmlExtension
+
+Version 1.10.0
 - Add Describe &amp; Compare object extension (usefull for audit trail)
 		
 Version 1.9.3
