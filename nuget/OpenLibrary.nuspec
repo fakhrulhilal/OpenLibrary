@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd">
     <metadata>
         <id>OpenLibrary</id>
-        <version>1.10.2</version>
+        <version>1.11.0</version>
         <title>OpenLibrary</title>
         <authors>Fakhrulhilal Maktum</authors>
         <owners>Fakhrulhilal Maktum</owners>
@@ -10,7 +10,11 @@
         <projectUrl>https://github.com/fakhrulhilal/OpenLibrary</projectUrl>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>Various utility for C# programmer.</description>
-        <releaseNotes>Version 1.10.2
+        <releaseNotes>Version 1.11.0
+- Add convertion from hex string to bytes
+- Enable support from mapping from/to enum in ObjectExtension.Map&lt;T&gt;()
+
+Version 1.10.2
 - Minor changes for XmlExtension
 
 Version 1.10.0

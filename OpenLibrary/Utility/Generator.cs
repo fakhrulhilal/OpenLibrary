@@ -162,5 +162,18 @@ namespace OpenLibrary.Utility
 			}
 			return sb.ToString(offset, digitMax - offset);
 		}
+
+		/// <summary>
+		/// Convert Hex string to bytes
+		/// </summary>
+		/// <param name="word">hex string</param>
+		/// <returns></returns>
+		public static byte[] FromHexString(this string word)
+		{
+			return Enumerable.Range(0, word.Length)
+							 .Where(x => x % 2 == 0)
+							 .Select(x => System.Convert.ToByte(word.Substring(x, 2), 16))
+							 .ToArray();
+		}
 	}
 }

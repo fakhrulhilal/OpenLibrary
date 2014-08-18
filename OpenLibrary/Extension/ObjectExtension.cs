@@ -364,14 +364,15 @@ namespace OpenLibrary.Extension
 														  BindingFlags.GetProperty |
 														  BindingFlags.Public);
 			var isDestinationChildOfSource = propertyDestination == propertySource || propertyDestination.IsSubclassOf(propertySource);
-			foreach (var pSource in properties)
+			//skip jika pada source terdapat attribute NotMapped
+			foreach (var pSource in properties.Where(m => !System.Attribute.IsDefined(m, typeof(NotMappedAttribute))))
 			{
-				//skip jika pada source terdapat attribute NotMapped
-				if (System.Attribute.IsDefined(pSource, typeof(NotMappedAttribute)))
-					continue;
+				////skip jika pada source terdapat attribute NotMapped
+				//if (System.Attribute.IsDefined(pSource, typeof(NotMappedAttribute)))
+				//	continue;
 				//gunakan nama kolom dari attribute Column sebagai ganti nama property jika ada
 				var aliasAttribute =
-					pSource.GetCustomAttributes(typeof(NotMappedAttribute), true);
+					pSource.GetCustomAttributes(typeof(ColumnAttribute), true);
 				string fieldName =
 					//abaikan penggunaan attribute Column jika destination adalah inherit dari source
 					!isDestinationChildOfSource &&
@@ -381,7 +382,7 @@ namespace OpenLibrary.Extension
 				var pOutput = propertyDestination.GetProperty(fieldName, BindingFlags.Instance |
 																		 BindingFlags.Public |
 																		 BindingFlags.SetProperty) ??
-					//gunakan nama property asli jika tidak ada
+							  //gunakan nama property asli jika tidak ada
 							  propertyDestination.GetProperty(pSource.Name, BindingFlags.Instance |
 																			BindingFlags.Public |
 																			BindingFlags.SetProperty);
@@ -399,16 +400,17 @@ namespace OpenLibrary.Extension
 					var nilai = pSource.GetValue(source, null);
 					if (pOutput != null &&
 						(pOutput.PropertyType == pSource.PropertyType ||
-						//kondisi khusus: jika tipe source nullable tapi base typenya sama asalkan nilainya ada
+						 //kondisi khusus: jika tipe source nullable tapi base typenya sama asalkan nilainya ada
 						 (pSource.PropertyType.IsNullable() && sourceType == pOutput.PropertyType && nilai != null) ||
-						//atau jika target nullable tapi base typenya sama dengan tipe data source
-						 (pOutput.PropertyType.IsNullable() && outputType == pSource.PropertyType) //||
-						//diperbolehkan jika target enum dan sumber merupakan bilangan bulat atau sebaliknya
-						 //((pOutput.PropertyType.IsEnum || pOutput.PropertyType.IsInteger()) &&
-						 // (sourceType.IsEnum || sourceType.IsInteger() || (pSource.PropertyType.IsNullable() && nilai != null))) ||
-						 //((pOutput.PropertyType.IsNullable() && (outputType.IsEnum || outputType.IsInteger())) &&
-						 // (pSource.PropertyType.IsEnum || pSource.PropertyType.IsInteger()))
-						  ) &&
+						 //atau jika target nullable tapi base typenya sama dengan tipe data source
+						 (pOutput.PropertyType.IsNullable() && outputType == pSource.PropertyType) ||
+						 //diperbolehkan jika target enum dan sumber merupakan bilangan bulat atau sebaliknya
+						 ((pOutput.PropertyType.IsEnum || pOutput.PropertyType.IsInteger()) &&
+						  (sourceType.IsEnum || sourceType.IsInteger() || (pSource.PropertyType.IsNullable() && nilai != null))) ||
+						 //diperbolehkan jika sumber enum dan target merupakan bilangan bulat atau sebaliknya
+						 ((pOutput.PropertyType.IsNullable() && (outputType.IsEnum || outputType.IsInteger())) &&
+						  (pSource.PropertyType.IsEnum || pSource.PropertyType.IsInteger()))
+						) &&
 						pOutput.CanWrite)
 						pOutput.SetValue(destination, nilai.To(pOutput.PropertyType), null);
 				}
